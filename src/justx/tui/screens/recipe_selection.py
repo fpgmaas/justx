@@ -54,7 +54,7 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     """
     BINDINGS: ClassVar = [
         Binding("q", "quit", "Quit"),
-        Binding("enter", "run_highlighted", "Run", show=True),
+        Binding("enter", "run_highlighted", "Run", show=True, priority=True),
         Binding("d", "details", "Details"),
         Binding("left", "focus_sources", "Sources"),
         Binding("right", "focus_recipes", "Recipes"),
@@ -127,10 +127,8 @@ class RecipeSelectionScreen(Screen[Selection | None]):
                 self._highlighted_recipe = self._selected_source.recipes[idx]
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        if event.list_view.id == "sources":
-            if self._id_to_source.get(event.item.id or "") is not None:
-                self.action_focus_recipes()
-        elif event.list_view.id == "recipes" and self._selected_source is not None:
+        # Handles mouse clicks; keyboard Enter is intercepted by action_run_highlighted
+        if event.list_view.id == "recipes" and self._selected_source is not None:
             recipe_index = event.list_view.index
             if recipe_index is not None:
                 self._select_recipe(self._selected_source.recipes[recipe_index])
@@ -147,8 +145,23 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
             self.app.push_screen(RecipeScreen(recipe, self._selected_source), on_args)
 
+    def check_action(self, action: str, _parameters: tuple) -> bool | None:
+        if action == "details":
+            focused = self.focused
+            if not isinstance(focused, ListView) or focused.id != "recipes":
+                return None
+        return True
+
     def action_run_highlighted(self) -> None:
-        pass  # Enter is handled by ListView.Selected; this exists for footer display
+        focused = self.focused
+        if not isinstance(focused, ListView):
+            return
+        if focused.id == "sources":
+            item = focused.highlighted_child
+            if item is not None and self._id_to_source.get(item.id or "") is not None:
+                self.action_focus_recipes()
+        elif focused.id == "recipes" and self._highlighted_recipe is not None:
+            self._select_recipe(self._highlighted_recipe)
 
     def action_details(self) -> None:
         recipe = self._highlighted_recipe
@@ -160,6 +173,11 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def action_focus_sources(self) -> None:
         self.query_one("#sources", ListView).focus()
+        self.refresh_bindings()
 
     def action_focus_recipes(self) -> None:
-        self.query_one("#recipes", ListView).focus()
+        recipes_list = self.query_one("#recipes", ListView)
+        recipes_list.focus()
+        if recipes_list.index is None and len(recipes_list) > 0:
+            recipes_list.index = 0
+        self.refresh_bindings()
