@@ -23,4 +23,4 @@ class Justx(App[Selection | None]):
 def run_tui(config: JustxConfig) -> None:
     selection = Justx(config).run()
     if selection is not None:
-        selection.source.run(selection.recipe.name, selection.args.values())
+        selection.source.run(selection.recipe.name, selection.args)

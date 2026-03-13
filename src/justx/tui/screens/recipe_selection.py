@@ -17,7 +17,7 @@ from justx.tui.widgets import RecipesPane, SourcesPane
 class Selection(NamedTuple):
     source: Source
     recipe: Recipe
-    args: dict[str, str]
+    args: list[str]
 
 
 class RecipeSelectionScreen(Screen[Selection | None]):
@@ -61,12 +61,14 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         recipe = message.recipe
         source = self._selected_source
         if not recipe.parameters:
-            self.dismiss(Selection(source=source, recipe=recipe, args={}))
+            self.dismiss(Selection(source=source, recipe=recipe, args=[]))
         else:
             self.app.push_screen(
                 RecipeScreen(recipe, source),
                 lambda args: (
-                    self.dismiss(Selection(source=source, recipe=recipe, args=args)) if args is not None else None
+                    self.app.call_later(self.dismiss, Selection(source=source, recipe=recipe, args=args))
+                    if args is not None
+                    else None
                 ),
             )
 
