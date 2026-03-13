@@ -54,6 +54,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         self._selected_source = message.source
         self.query_one(RecipesPane).set_source(message.source)
 
+    def on_sources_pane_source_activated(self, message: SourcesPane.SourceActivated) -> None:
+        self.action_focus_recipes()
+
     def on_recipes_pane_recipe_run(self, message: RecipesPane.RecipeRun) -> None:
         recipe = message.recipe
         source = self._selected_source

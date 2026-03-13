@@ -20,11 +20,12 @@ classifiers = [
 dependencies = [
     "click>=8.0",
     "pydantic>=2.12.5",
+    "rich>=14.3.3",
     "textual>=8.1.1",
 ]
 
 [project.scripts]
-justx = "justx.cli:main"
+justx = "justx.cli.main:main"
 
 [project.urls]
 Homepage = "https://fpgmaas.github.io/justx/"

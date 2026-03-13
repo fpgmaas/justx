@@ -1,4 +1,3 @@
-import subprocess
 from typing import ClassVar
 
 from textual.app import App
@@ -24,13 +23,4 @@ class Justx(App[Selection | None]):
 def run_tui(config: JustxConfig) -> None:
     selection = Justx(config).run()
     if selection is not None:
-        subprocess.run(
-            [
-                "just",
-                "--justfile",
-                str(selection.source.path),
-                selection.recipe.name,
-                *selection.args.values(),
-            ],
-            check=False,
-        )
+        selection.source.run(selection.recipe.name, selection.args.values())
