@@ -66,7 +66,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
             self.app.push_screen(
                 RecipeScreen(recipe, source),
                 lambda args: (
-                    self.dismiss(Selection(source=source, recipe=recipe, args=args)) if args is not None else None
+                    self.app.call_later(self.dismiss, Selection(source=source, recipe=recipe, args=args))
+                    if args is not None
+                    else None
                 ),
             )
 
