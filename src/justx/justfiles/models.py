@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import shutil
+import subprocess
+from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
 
 from pydantic import BaseModel
+from rich.console import Console
+from rich.markup import escape
 
 
 class ParameterKind(str, Enum):
@@ -61,6 +66,28 @@ class Source(BaseModel):
     scope: Scope
     path: Path
     recipes: list[Recipe]
+
+    def run(self, recipe_name: str, args: Iterable[str] = ()) -> int:
+        from justx.justfiles.exceptions import JustNotFoundError
+
+        just_bin = shutil.which("just")
+        if just_bin is None:
+            raise JustNotFoundError()
+        result = subprocess.run([just_bin, "--justfile", str(self.path), recipe_name, *args], check=False)
+        return result.returncode
+
+    def pretty_print(self, console: Console | None = None) -> None:
+        console = console or Console()
+        scope_label = self.scope.value
+        console.print(
+            f"[bold]{escape(self.name)}[/bold]  [dim]\\[{scope_label}][/dim]  [dim]{escape(str(self.path))}[/dim]"
+        )
+        for recipe in self.recipes:
+            params = " ".join(p.name for p in recipe.parameters)
+            signature = escape(f"{recipe.name} {params}".strip())
+            doc = f"  [dim]# {escape(recipe.doc)}[/dim]" if recipe.doc else ""
+            console.print(f"  [cyan]{signature}[/cyan]{doc}")
+        console.print()
 
 
 class JustxConfig(BaseModel):

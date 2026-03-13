@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
+from textual.binding import Binding
 from textual.message import Message
 from textual.widgets import Label, ListItem, ListView
 
@@ -20,12 +23,19 @@ class SourcesPane(ListView):
     }
     """
 
+    BINDINGS: ClassVar = [
+        Binding("enter", "activate", "Select", show=False, priority=True),
+    ]
+
     class SourceSelected(Message):
         """Emitted when a source is highlighted."""
 
         def __init__(self, source: Source) -> None:
             self.source = source
             super().__init__()
+
+    class SourceActivated(Message):
+        """Emitted when the user confirms a source (Enter key)."""
 
     def __init__(self, config: JustxConfig) -> None:
         self._id_to_source: dict[str, Source] = {}
@@ -57,3 +67,6 @@ class SourcesPane(ListView):
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if event.item and (source := self._id_to_source.get(event.item.id or "")):
             self.post_message(self.SourceSelected(source))
+
+    def action_activate(self) -> None:
+        self.post_message(self.SourceActivated())
