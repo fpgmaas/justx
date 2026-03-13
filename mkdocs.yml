@@ -1,23 +1,21 @@
-site_name: ckit
-repo_url: https://github.com/fpgmaas/ckit
-site_url: https://fpgmaas.github.io/ckit
-site_description: Organize and run frequently used commands
+site_name: justx
+repo_url: https://github.com/fpgmaas/justx
+site_url: https://fpgmaas.github.io/justx
+site_description: This is a template repository for Python projects that use uv for their dependency management.
 site_author: Florian Maas
 edit_uri: edit/main/docs/
-repo_name: fpgmaas/ckit
-copyright: Maintained by <a href="https://fpgmaas.com">Florian</a>.
+repo_name: fpgmaas/justx
+copyright: Maintained by <a href="https://fpgmaas.com">fpgmaas</a>.
 
 nav:
   - Home: index.md
-  - Configuration: configuration.md
+  - Modules: modules.md
 plugins:
   - search
   - mkdocstrings:
       handlers:
         python:
-            setup_commands:
-                - import sys
-                - sys.path.append('../')
+          paths: ["src/justx"]
 theme:
   name: material
   feature:
@@ -43,9 +41,9 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/fpgmaas/ckit
+      link: https://github.com/fpgmaas/justx
     - icon: fontawesome/brands/python
-      link: https://pypi.com/project/ckit
+      link: https://pypi.org/project/justx
 
 markdown_extensions:
   - toc:

@@ -1,12 +1,9 @@
 coverage:
-  range: 60..100
+  range: 70..100
   round: down
   precision: 1
-  ignore:
-    - "ckit/cli.py"
-    - "ckit/core.py"
   status:
     project:
       default:
-        target: 80%
+        target: 90%
         threshold: 0.5%

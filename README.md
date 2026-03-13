@@ -1,82 +1,74 @@
-<p align="center">
-  <img alt="ckit logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/ckit/main/docs/static/ckit-logo.svg">
-</p>
+# justx
 
----
+[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
+[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/fpgmaas/justx)](https://img.shields.io/github/commit-activity/m/fpgmaas/justx)
+[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
 
-[![Release](https://img.shields.io/github/v/release/fpgmaas/ckit)](https://img.shields.io/github/v/release/fpgmaas/ckit)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/ckit/main.yml?branch=main)](https://github.com/fpgmaas/ckit/actions/workflows/main.yml?query=branch%3Amain)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/ckit)](https://pypi.org/project/ckit/)
-[![codecov](https://codecov.io/gh/fpgmaas/ckit/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/ckit)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/ckit)](https://pypistats.org/packages/ckit)
-[![License](https://img.shields.io/github/license/fpgmaas/ckit)](https://img.shields.io/github/license/fpgmaas/ckit)
+This is a template repository for Python projects that use uv for their dependency management.
 
-_ckit_ is a command line utility to help you organise and quickly run frequently used commands.
+- **Github repository**: <https://github.com/fpgmaas/justx/>
+- **Documentation** <https://fpgmaas.github.io/justx/>
 
-<p align="center">
-<img src="docs/static/ckit.gif"/>
-</p>
+## Getting started with your project
 
----
-<p align="center">
-  <a href="https://fpgmaas.github.io/ckit">Documentation</a> - <a href="https://github.com/fpgmaas/ckit-files/">Example configuration files</a>
-</p>
+### 1. Create a New Repository
 
----
-
-## Quickstart
-
-### Installation
-
-_ckit_ can be installed by running
-
-```shell
-pip install ckit
-```
-
-To get started, run
+First, create a repository on GitHub with the same name as this project, and then run the following commands:
 
 ```bash
-ckit init
+git init -b main
+git add .
+git commit -m "init commit"
+git remote add origin git@github.com:fpgmaas/justx.git
+git push -u origin main
 ```
 
-which will prompt to add a `ckit/ckit.yaml` file in the user's home directory for global commands, and/or a `ckit.yaml` file in the current directory for commands specific to the current project.  Alternatively, run
+### 2. Set Up Your Development Environment
+
+Then, install the environment and the pre-commit hooks with
 
 ```bash
-ckit init --download-global-defaults
+make install
 ```
 
-to get started with a richer set of examples in the global configuration directory, see [ckit-files](https://github.com/fpgmaas/ckit-files/).
+This will also generate your `uv.lock` file
 
-To use _ckit_ to run any of the pre-configured commands, simply run
+### 3. Run the pre-commit hooks
 
-```
-ckit
-```
+Initially, the CI/CD pipeline might be failing due to formatting issues. To resolve those run:
 
-## Configuration
-
-_ckit_ can look for configuration in the following two locations:
-
-- In a `ckit.yaml` file in the current directory
-- In any `.yaml` file in the the global configuration directory, which is defaulted to `~/ckit`, but which can be overridden with the environment variable `CKIT_HOME`.
-
-An example `.yaml` file could look as follows:
-
-```yaml
-test:
-  my-command:
-    cmd: "echo Hello! My name is: $name. My favourite fruit is: $fruit"
-    echo: false
-    args:
-      - name
-      - fruit: apple
+```bash
+uv run pre-commit run -a
 ```
 
-Which adds the command group `test` wth a single command called `my-command`. When `my-command` is selected to be run, _ckit_ prompts the user for `name` and `fruit` before running the command specified in `cmd`, where `fruit` is defaulted to `apple` if the user does not give any input.
+### 4. Commit the changes
 
-For more details, see the [configuration](https://fpgmaas.github.io/ckit/configuration) section of the documentation.
+Lastly, commit the changes made by the two steps above to your repository.
+
+```bash
+git add .
+git commit -m 'Fix formatting issues'
+git push origin main
+```
+
+You are now ready to start development on your project!
+The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
+
+To finalize the set-up for publishing to PyPI, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/publishing/#set-up-for-pypi).
+For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/mkdocs/#enabling-the-documentation-on-github).
+To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/codecov/).
+
+## Releasing a new version
+
+- Create an API Token on [PyPI](https://pypi.org/).
+- Add the API Token to your projects secrets with the name `PYPI_TOKEN` by visiting [this page](https://github.com/fpgmaas/justx/settings/secrets/actions/new).
+- Create a [new release](https://github.com/fpgmaas/justx/releases/new) on Github.
+- Create a new tag in the form `*.*.*`.
+
+For more details, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/cicd/#how-to-trigger-a-release).
 
 ---
 
-Repository initiated with [fpgmaas/cookiecutter-poetry](https://github.com/fpgmaas/cookiecutter-poetry).
+Repository initiated with [fpgmaas/cookiecutter-uv](https://github.com/fpgmaas/cookiecutter-uv).

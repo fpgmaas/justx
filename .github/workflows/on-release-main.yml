@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  
+
   publish:
     runs-on: ubuntu-latest
     steps:
@@ -25,10 +25,10 @@ jobs:
           source .venv/bin/activate
           poetry version $RELEASE_VERSION
           make build-and-publish
-        env: 
+        env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
           RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-  
+
   deploy-docs:
     needs: publish
     runs-on: ubuntu-latest
@@ -41,4 +41,3 @@ jobs:
 
       - name: Deploy documentation
         run: poetry run mkdocs gh-deploy --force
-  
