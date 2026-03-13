@@ -85,7 +85,10 @@ class Source(BaseModel):
         just_bin = shutil.which("just")
         if just_bin is None:
             raise JustNotFoundError()
-        result = subprocess.run([just_bin, "--justfile", str(self.path), recipe_name, *args], check=False)
+        result = subprocess.run(
+            [just_bin, "--justfile", str(self.path), "--working-directory", str(Path.cwd()), recipe_name, *args],
+            check=False,
+        )
         return result.returncode
 
     def pretty_print(self, console: Console | None = None) -> None:

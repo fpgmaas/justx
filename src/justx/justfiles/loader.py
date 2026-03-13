@@ -23,7 +23,7 @@ class JustxLoader:
 
         Args:
             cwd: Local directory to scan. Defaults to the current working directory.
-            justx_home: Global home directory. Defaults to $JUIST_HOME or ~/.justx.
+            justx_home: Global home directory. Defaults to $JUSTX_HOME or ~/.justx.
         """
         paths = self._discovery.discover(cwd=cwd, justx_home=justx_home)
         return JustxConfig(

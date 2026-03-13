@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from justx.justfiles.discovery import DEFAULT_JUIST_HOME, DiscoveredPaths, JustxDiscovery
+from justx.justfiles.discovery import DEFAULT_JUSTX_HOME, DiscoveredPaths, JustxDiscovery
 
 
 def _write_justfile(path: Path, content: str = "hello:\n    echo hello\n") -> Path:
@@ -99,7 +99,7 @@ def test_justx_home_env_var(monkeypatch, tmp_path):
     cwd = tmp_path / "cwd"
     cwd.mkdir()
 
-    monkeypatch.setenv("JUIST_HOME", str(home))
+    monkeypatch.setenv("JUSTX_HOME", str(home))
     result = JustxDiscovery().discover(cwd=cwd)
 
     assert result.global_paths == [home / "justfile"]
@@ -115,14 +115,14 @@ def test_justx_home_arg_takes_precedence_over_env_var(monkeypatch, tmp_path):
     cwd = tmp_path / "cwd"
     cwd.mkdir()
 
-    monkeypatch.setenv("JUIST_HOME", str(env_home))
+    monkeypatch.setenv("JUSTX_HOME", str(env_home))
     result = JustxDiscovery().discover(cwd=cwd, justx_home=arg_home)
 
     assert result.global_paths == [arg_home / "dev.just"]
 
 
 def test_default_home_is_dot_justx():
-    assert Path.home() / ".justx" == DEFAULT_JUIST_HOME
+    assert Path.home() / ".justx" == DEFAULT_JUSTX_HOME
 
 
 def test_returns_discovered_paths_instance(tmp_home, tmp_cwd):
