@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 from justx.justfiles.exceptions import JustInvocationError, JustNotFoundError
-from justx.justfiles.models import Parameter, ParameterKind, Recipe, Scope, Source
+from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source
 
 
 class JustfileParser:
@@ -56,14 +56,23 @@ class JustfileParser:
         )
 
     def _parse_parameter(self, raw: dict) -> Parameter:
-        default: str | None = raw.get("default")
-        kind = self._parameter_kind(raw["kind"], default)
+        raw_default = raw.get("default")
+        if raw_default is None:
+            default = None
+            has_default = False
+        else:
+            default = RecipeDefault(
+                value=raw_default,
+                expression=not isinstance(raw_default, str),
+            )
+            has_default = True
+        kind = self._parameter_kind(raw["kind"], has_default)
         return Parameter(name=raw["name"], default=default, kind=kind)
 
     @staticmethod
-    def _parameter_kind(just_kind: str, default: str | None) -> ParameterKind:
+    def _parameter_kind(just_kind: str, has_default: bool) -> ParameterKind:
         if just_kind in ("star", "plus"):
             return ParameterKind.variadic
-        if default is not None:
+        if has_default:
             return ParameterKind.optional
         return ParameterKind.required

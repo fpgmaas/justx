@@ -22,6 +22,18 @@ class Scope(str, Enum):
     local = "local"
 
 
+class RecipeDefault(BaseModel):
+    """The default value of a recipe parameter.
+
+    Attributes:
+        value: Raw value from just --dump (string, list, or None for empty string default).
+        expression: True if the default is a complex expression (list), False for string literals.
+    """
+
+    value: str | list | None
+    expression: bool
+
+
 class Parameter(BaseModel):
     """A parameter declared in a just recipe.
 
@@ -32,7 +44,7 @@ class Parameter(BaseModel):
     """
 
     name: str
-    default: str | None
+    default: RecipeDefault | None
     kind: ParameterKind
 
 

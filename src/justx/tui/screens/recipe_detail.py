@@ -107,7 +107,12 @@ class RecipeDetailScreen(Screen[None]):
             ParameterKind.optional: "optional",
             ParameterKind.variadic: "variadic",
         }
-        default = f", default: {param.default!r}" if param.default is not None else ""
+        if param.default is None:
+            default = ""
+        elif param.default.expression:
+            default = ", default: <expression>"
+        else:
+            default = f", default: {param.default.value!r}"
         return Label(f"  {param.name}  ({kind_map[param.kind]}{default})", classes="param-row")
 
     def action_dismiss(self) -> None:
