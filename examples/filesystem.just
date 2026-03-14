@@ -1,5 +1,3 @@
-# justx: working-directory = justfile
-
 # Disk usage by subdirectory, sorted by size
 usage path="." depth="1":
     du -h -d {{depth}} {{path}} | sort -hr
