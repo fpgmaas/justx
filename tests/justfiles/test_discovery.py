@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from justx.justfiles.discovery import DEFAULT_JUSTX_HOME, DiscoveredPaths, JustxDiscovery
+from justx.config import DEFAULT_JUSTX_HOME
+from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 
 
 def _write_justfile(path: Path, content: str = "hello:\n    echo hello\n") -> Path:

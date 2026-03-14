@@ -11,9 +11,9 @@ import questionary
 from rich.console import Console
 from rich.markup import escape
 
-from justx.justfiles.discovery import DEFAULT_JUSTX_HOME
+from justx.config import get_justx_home
 
-GITHUB_EXAMPLES_API = "https://api.github.com/repos/fpgmaas/ckit/contents/examples?ref=dev"
+GITHUB_EXAMPLES_API = "https://api.github.com/repos/fpgmaas/justx/contents/examples?ref=dev"
 
 USER_JUST_CONTENT = """\
 # User-defined recipes for justx
@@ -29,7 +29,7 @@ now:
 
 
 def _fetch_example_files() -> list[dict]:
-    """Fetch list of *.just files from the ckit examples directory on GitHub."""
+    """Fetch list of *.just files from the justx examples directory on GitHub."""
     req = urllib.request.Request(GITHUB_EXAMPLES_API, headers={"Accept": "application/vnd.github+json"})  # noqa: S310
     with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
         entries = json.loads(resp.read())
@@ -100,22 +100,17 @@ def _init_default(justx_home: Path, console: Console, stderr: Console) -> None:
 
 @click.command("init")
 @click.option(
-    "--home",
-    default=None,
-    help="Override the justx home directory (default: ~/.justx).",
-    type=click.Path(),
-)
-@click.option(
     "--download-examples",
     is_flag=True,
     default=False,
-    help="Download example justfiles from the ckit GitHub repo into the justx home directory.",
+    help="Download example justfiles from the justx GitHub repo into the justx home directory.",
 )
-def init_cmd(home: str | None, download_examples: bool) -> None:
+def init_cmd(download_examples: bool) -> None:
     """Initialize the ~/.justx directory with a sample user.just file."""
     console = Console()
     stderr = Console(stderr=True)
-    justx_home = Path(home) if home else DEFAULT_JUSTX_HOME
+
+    justx_home = get_justx_home()
 
     if download_examples:
         _init_from_examples(justx_home, console, stderr)
