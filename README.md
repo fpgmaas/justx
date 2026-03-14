@@ -1,74 +1,95 @@
-# justx
-
-[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/fpgmaas/justx)](https://img.shields.io/github/commit-activity/m/fpgmaas/justx)
-[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
-
-This is a template repository for Python projects that use uv for their dependency management.
-
-- **Github repository**: <https://github.com/fpgmaas/justx/>
-- **Documentation** <https://fpgmaas.github.io/justx/>
-
-## Getting started with your project
-
-### 1. Create a New Repository
-
-First, create a repository on GitHub with the same name as this project, and then run the following commands:
-
-```bash
-git init -b main
-git add .
-git commit -m "init commit"
-git remote add origin git@github.com:fpgmaas/justx.git
-git push -u origin main
-```
-
-### 2. Set Up Your Development Environment
-
-Then, install the environment and the pre-commit hooks with
-
-```bash
-make install
-```
-
-This will also generate your `uv.lock` file
-
-### 3. Run the pre-commit hooks
-
-Initially, the CI/CD pipeline might be failing due to formatting issues. To resolve those run:
-
-```bash
-uv run pre-commit run -a
-```
-
-### 4. Commit the changes
-
-Lastly, commit the changes made by the two steps above to your repository.
-
-```bash
-git add .
-git commit -m 'Fix formatting issues'
-git push origin main
-```
-
-You are now ready to start development on your project!
-The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
-
-To finalize the set-up for publishing to PyPI, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/publishing/#set-up-for-pypi).
-For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/mkdocs/#enabling-the-documentation-on-github).
-To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/codecov/).
-
-## Releasing a new version
-
-- Create an API Token on [PyPI](https://pypi.org/).
-- Add the API Token to your projects secrets with the name `PYPI_TOKEN` by visiting [this page](https://github.com/fpgmaas/justx/settings/secrets/actions/new).
-- Create a [new release](https://github.com/fpgmaas/justx/releases/new) on Github.
-- Create a new tag in the form `*.*.*`.
-
-For more details, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/cicd/#how-to-trigger-a-release).
+<p align="center">
+  <img alt="justx logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/justx/dev/docs/static/justx-logo.svg">
+</p>
 
 ---
 
-Repository initiated with [fpgmaas/cookiecutter-uv](https://github.com/fpgmaas/cookiecutter-uv).
+[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
+[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/justx)](https://pypi.org/project/justx/)
+[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/justx)](https://pypistats.org/packages/justx)
+[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
+
+**justx** is a TUI command launcher built on [just](https://github.com/casey/just). Define your recipes once and run them from anywhere on your system.
+
+<p align="center">
+  <img src="docs/static/placeholder.png" alt="justx TUI demo"/>
+</p>
+
+---
+
+<p align="center">
+  <a href="https://fpgmaas.github.io/justx/">Documentation</a> &nbsp;·&nbsp;
+  <a href="https://pypi.org/project/justx/">PyPI</a>
+</p>
+
+---
+
+## Installation
+
+```shell
+uv tool install justx   # recommended
+# or
+pip install justx
+```
+
+> **Prerequisite:** the [`just`](https://github.com/casey/just#installation) binary must be available on `$PATH`.
+
+## Quickstart
+
+**1. Initialise your global recipe library:**
+
+```shell
+justx init
+```
+
+This creates `~/.justx/` with a sample justfile to get you started. To pull in a richer set of ready-made recipes (git, docker, filesystem tools, and more), run:
+
+```shell
+justx init --download-examples
+```
+
+**2. Launch the TUI:**
+
+```shell
+justx
+```
+
+Browse your recipes with the arrow keys and press `Enter` to run one. Press `q` to quit.
+
+## Global recipes
+
+**justx** supports global recipes; recipes that are available from anywhere on your machine, no matter which project you're in.
+
+Split them into topic-focused files if you like:
+
+```
+~/.justx/
+├── justfile        # everyday catch-all recipes
+├── git.just        # git workflows
+├── docker.just     # container management
+└── ssh.just        # remote connections
+```
+
+For example, `~/.justx/docker.just` might contain:
+
+```just
+# Remove all stopped containers, unused images, and volumes
+prune:
+    docker system prune -a --volumes -f
+```
+
+**justx** discovers these automatically and makes them available everywhere on your system by running `justx` in your terminal.
+
+You can also skip the TUI and run recipes directly with `justx run`:
+
+```shell
+# Run 'build' from the global 'docker' group with `my-image` as the tag
+# Equivalent to: just --justfile ~/.justx/docker.just --working-directory . build my-image
+justx run -g -G docker build my-image
+```
+
+---
+
+For full configuration details, file discovery behaviour, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).

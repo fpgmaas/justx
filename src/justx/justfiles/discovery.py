@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DEFAULT_JUSTX_HOME = Path.home() / ".justx"
+from justx.config import get_justx_home
 
 
 @dataclass
@@ -34,10 +33,7 @@ class JustxDiscovery:
     def _resolve_home(self, justx_home: Path | None) -> Path:
         if justx_home is not None:
             return justx_home
-        env = os.environ.get("JUSTX_HOME")
-        if env:
-            return Path(env)
-        return DEFAULT_JUSTX_HOME
+        return get_justx_home()
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []
