@@ -43,5 +43,5 @@ def test_run_global_source_not_found(tmp_path: Path) -> None:
 def test_run_success(global_dir: Path) -> None:
     runner = CliRunner()
     with run_within_dir(global_dir):
-        result = runner.invoke(main, ["run", "-g", "setup", "-G", "setup"], env={"JUSTX_HOME": str(global_dir)})
+        result = runner.invoke(main, ["run", "-g", "setup", "-G", "setup"])
     assert result.exit_code == 0

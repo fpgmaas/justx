@@ -28,7 +28,7 @@ def test_check_just_found_no_sources(tmp_path: Path) -> None:
 def test_check_just_found_with_sources(local_dir: Path, global_dir: Path) -> None:
     runner = CliRunner()
     with run_within_dir(local_dir):
-        result = runner.invoke(main, ["check"], env={"JUSTX_HOME": str(global_dir)})
+        result = runner.invoke(main, ["check"])
     assert result.exit_code == 0
     assert "simple.just" in result.output  # local source
     assert "justfile" in result.output  # global source

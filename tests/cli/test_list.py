@@ -32,7 +32,7 @@ def test_list_local(local_dir: Path) -> None:
 def test_list_global(global_dir: Path) -> None:
     runner = CliRunner()
     with run_within_dir(global_dir):
-        result = runner.invoke(main, ["list", "--global"], env={"JUSTX_HOME": str(global_dir)})
+        result = runner.invoke(main, ["list", "--global"])
     assert result.exit_code == 0
     assert "setup" in result.output
     assert "Global setup task" in result.output
@@ -41,7 +41,7 @@ def test_list_global(global_dir: Path) -> None:
 def test_list_both_scopes(local_dir: Path, global_dir: Path) -> None:
     runner = CliRunner()
     with run_within_dir(local_dir):
-        result = runner.invoke(main, ["list"], env={"JUSTX_HOME": str(global_dir)})
+        result = runner.invoke(main, ["list"])
     assert result.exit_code == 0
     assert "greet" in result.output  # from local simple.just
     assert "setup" in result.output  # from global justfile
