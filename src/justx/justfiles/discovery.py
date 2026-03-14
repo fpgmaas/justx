@@ -58,4 +58,4 @@ class JustxDiscovery:
     def _scan_just_files(self, directory: Path) -> list[Path]:
         if not directory.is_dir():
             return []
-        return sorted(directory.glob("*.just"))
+        return sorted([*directory.glob("*.just"), *directory.glob("*.justfile")])

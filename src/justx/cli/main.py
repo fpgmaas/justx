@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import click
 
-from justx.cli.commands import check_cmd, list_cmd, run_cmd
+from justx.cli.commands import check_cmd, init_cmd, list_cmd, run_cmd
 from justx.justfiles.loader import JustxLoader
 from justx.tui import run_tui
 
@@ -19,3 +19,4 @@ def main(ctx: click.Context) -> None:
 main.add_command(list_cmd)
 main.add_command(run_cmd)
 main.add_command(check_cmd)
+main.add_command(init_cmd)

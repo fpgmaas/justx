@@ -24,7 +24,8 @@ upgrade-package package:
 
 # Export dependencies to requirements.txt
 export:
-    uv export --format requirements-txt --no-hashes > requirements.txt
+    uv export --format requirements-txt --no-hashes --frozen --no-emit-project > requirements.txt
+    @echo "Project dependencies written to requirements.txt"
 
 # List outdated packages
 outdated:
