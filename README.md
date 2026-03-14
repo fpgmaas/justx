@@ -2,20 +2,26 @@
   <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
 </p>
 
+
+<p align="center">
+  <a href="https://img.shields.io/github/v/release/fpgmaas/justx"><img alt="Release" src="https://img.shields.io/github/v/release/fpgmaas/justx"></a>
+  <a href="https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main"></a>
+  <a href="https://pypi.org/project/justx/"><img alt="Supported Python versions" src="https://img.shields.io/pypi/pyversions/justx"></a>
+  <a href="https://pypistats.org/packages/justx"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/justx"></a>
+</p>
+
 ---
 
-[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/justx)](https://pypi.org/project/justx/)
-[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/justx)](https://pypistats.org/packages/justx)
-[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
 
-**justx** is a A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.
+<p align="center">
+<bold>justx</bold> is a A TUI command launcher built on top of <a href = "https://github.com/casey/just">just</a>. Define recipes once, run them anywhere.
+</p>
+
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif" alt="justx TUI demo"/>
 </p>
+
 
 ---
 
