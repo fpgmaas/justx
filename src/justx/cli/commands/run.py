@@ -17,7 +17,7 @@ from justx.justfiles.loader import JustxLoader
 def run_cmd(use_global: bool, use_local: bool, target: str, args: tuple[str, ...]) -> None:
     """Run a recipe. Specify scope with -l or -g.
 
-    TARGET format: group:recipe or recipe for root justfile.
+    TARGET format: source:recipe or recipe for root justfile.
     """
     if use_global and use_local:
         raise click.UsageError("Cannot use -g and -l together.")  # noqa: TRY003
@@ -28,10 +28,10 @@ def run_cmd(use_global: bool, use_local: bool, target: str, args: tuple[str, ...
     scope = "global" if use_global else "local"
     sources = config.global_sources if use_global else config.local_sources
 
-    group, recipe = parse_target(target)
-    source = find_source(sources, group)
+    source_name, recipe = parse_target(target)
+    source = find_source(sources, source_name)
 
-    label = group or "root justfile"
+    label = source_name or "root justfile"
     if source is None:
         raise click.ClickException(f"'{label}' not found in {scope} sources.")  # noqa: TRY003
 

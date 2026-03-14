@@ -85,7 +85,7 @@ shell image_tag:
 You can also skip the TUI and run recipes directly with `justx run`:
 
 ```shell
-# Run 'shell' from the global 'docker' group with `my-image` as the tag
+# Run 'shell' from the global 'docker' source with `my-image` as the tag
 # Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
 justx run -g docker:shell my-image
 ```

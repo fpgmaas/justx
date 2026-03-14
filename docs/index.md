@@ -18,7 +18,7 @@ Store your frequently used commands as `just` recipes in `~/.justx/`, then run t
 `justx run` lets you execute recipes directly, acting as a shorthand for long `just` invocations:
 
 ```bash
-# Run 'build' from the global 'docker' group with `my-image` as the tag
+# Run 'build' from the global 'docker' source with `my-image` as the tag
 # Equivalent to `just --justfile ~/.justx/docker.just --working-directory . build my-image`
 justx run -g docker:build my-image
 ```

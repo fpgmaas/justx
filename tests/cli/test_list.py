@@ -55,7 +55,7 @@ def test_list_conflicting_flags(local_dir: Path) -> None:
     assert "Cannot use -g and -l together." in result.output
 
 
-def test_list_with_group_filter(local_dir: Path) -> None:
+def test_list_with_source_filter(local_dir: Path) -> None:
     runner = CliRunner()
     with run_within_dir(local_dir):
         result = runner.invoke(main, ["list", "-g", "setup"])

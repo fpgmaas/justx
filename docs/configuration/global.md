@@ -19,9 +19,9 @@ export JUSTX_HOME=/path/to/my/justx-home
 | File pattern | Description |
 |---|---|
 | `~/.justx/justfile` | Root justfile. |
-| `~/.justx/*.just` | Additional recipe groups (one topic per file). |
+| `~/.justx/*.just` | Additional recipe sources (one topic per file). |
 
-Each file becomes a named **group** in the TUI. The group name is the file stem — `docker.just` becomes the `docker` group, `git.just` becomes `git`, and so on. The root `justfile` (if present) is loaded first; the rest are loaded alphabetically.
+Each file becomes a named **source** in the TUI. The source name is the file stem — `docker.just` becomes the `docker` source, `git.just` becomes `git`, and so on. The root `justfile` (if present) is loaded first; the rest are loaded alphabetically.
 
 ## Example directory layout
 
@@ -37,7 +37,7 @@ Each file becomes a named **group** in the TUI. The group name is the file stem 
 
 ## Suggested organisation
 
-Organise by tool or topic — one file per concern. This keeps each group focused and makes it easy to find recipes in the TUI:
+Organise by tool or topic — one file per concern. This keeps each source focused and makes it easy to find recipes in the TUI:
 
 ```just
 # git.just — git workflow shortcuts

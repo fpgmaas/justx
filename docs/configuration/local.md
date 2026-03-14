@@ -7,7 +7,7 @@ Local justfiles live alongside your project and are only loaded when justx is ru
 | File pattern | Description |
 |---|---|
 | `./justfile` or `./Justfile` | Root justfile. |
-| `./.justx/*.just` | Additional recipe groups (one topic per file). |
+| `./.justx/*.just` | Additional recipe sources (one topic per file). |
 
 ## Example layout for a Python project
 
@@ -38,4 +38,4 @@ build:
     uv build
 ```
 
-Additional groups in `.justx/` follow the same naming convention as global files — the file stem becomes the group name shown in the TUI.
+Additional sources in `.justx/` follow the same naming convention as global files — the file stem becomes the source name shown in the TUI.

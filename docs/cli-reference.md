@@ -46,17 +46,17 @@ justx init --download-examples
 
 ## `justx list`
 
-List all discovered groups and their recipes.
+List all discovered sources and their recipes.
 
 ```
-justx list [OPTIONS] [GROUP]
+justx list [OPTIONS] [SOURCE]
 ```
 
 ### Arguments
 
 | Argument | Description |
 |----------|-------------|
-| `GROUP` | Optional. Filter output to a single named justfile group (e.g. `docker`). |
+| `SOURCE` | Optional. Filter output to a single named justfile source (e.g. `docker`). |
 
 ### Options
 
@@ -79,7 +79,7 @@ justx list -g
 # List only local recipes
 justx list -l
 
-# List only the global 'docker' group
+# List only the global 'docker' source
 justx list -g docker
 ```
 
@@ -97,7 +97,7 @@ justx run (-g | -l) TARGET [ARGS]...
 
 | Argument | Description |
 |----------|-------------|
-| `TARGET` | Recipe to run. Use `group:recipe` to target a named justfile group, or `recipe` alone to target the root `justfile`. |
+| `TARGET` | Recipe to run. Use `source:recipe` to target a named justfile source, or `recipe` alone to target the root `justfile`. |
 | `ARGS` | Optional extra arguments passed through to `just`. |
 
 ### Options
@@ -116,7 +116,7 @@ Exactly one of `-g` or `-l` is required. They are mutually exclusive.
 # Equivalent to: just --justfile ~/.justx/justfile --working-directory . greet Alice
 justx run -g greet Alice
 
-# Run 'shell' from the global 'docker' group with `my-image` as the tag
+# Run 'shell' from the global 'docker' source with `my-image` as the tag
 # Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
 justx run -g docker:shell my-image
 
@@ -124,7 +124,7 @@ justx run -g docker:shell my-image
 # Equivalent to: just test -x -v
 justx run -l test -x -v
 
-# Run 'staging' from the local 'deploy' group
+# Run 'staging' from the local 'deploy' source
 # Equivalent to: just --justfile .justx/deploy.just --working-directory . staging
 justx run -l deploy:staging
 ```
