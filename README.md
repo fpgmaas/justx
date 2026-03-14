@@ -14,7 +14,7 @@
 **justx** is a A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.
 
 <p align="center">
-  <img src="docs/static/placeholder.png" alt="justx TUI demo"/>
+  <img src="https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif" alt="justx TUI demo"/>
 </p>
 
 ---

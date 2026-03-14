@@ -2,7 +2,7 @@
 
 **A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.**
 
-![justx TUI demo](static/placeholder.png)
+![justx TUI demo](https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif)
 
 Store your frequently used commands as `just` recipes in `~/.justx/`, then run them from any directory through an interactive terminal UI by simply running `justx`. No memorising command names or flags; just pick a recipe and go.
 
