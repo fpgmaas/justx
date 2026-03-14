@@ -28,7 +28,7 @@ class RecipesPane(ListView):
         height: auto;
     }
     ListItem {
-        margin-bottom: 1;
+        margin-bottom: 0;
     }
     """
 
