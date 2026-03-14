@@ -17,7 +17,7 @@ check:
 # Run unit tests.
 test:
     @echo "🚀 Running unit tests"
-    uv run pytest tests
+    @uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml tests
 
 # Test if documentation can be built without warnings or errors. Test if documentation can be built without warnings or errors.
 docs-test:

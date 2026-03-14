@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DEFAULT_JUIST_HOME = Path.home() / ".justx"
+DEFAULT_JUSTX_HOME = Path.home() / ".justx"
 
 
 @dataclass
@@ -21,7 +21,7 @@ class JustxDiscovery:
 
         Args:
             cwd: Local directory to scan. Defaults to the current working directory.
-            justx_home: Global home directory. Defaults to $JUIST_HOME or ~/.justx.
+            justx_home: Global home directory. Defaults to $JUSTX_HOME or ~/.justx.
         """
         home = self._resolve_home(justx_home)
         resolved_cwd = cwd or Path.cwd()
@@ -34,10 +34,10 @@ class JustxDiscovery:
     def _resolve_home(self, justx_home: Path | None) -> Path:
         if justx_home is not None:
             return justx_home
-        env = os.environ.get("JUIST_HOME")
+        env = os.environ.get("JUSTX_HOME")
         if env:
             return Path(env)
-        return DEFAULT_JUIST_HOME
+        return DEFAULT_JUSTX_HOME
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []

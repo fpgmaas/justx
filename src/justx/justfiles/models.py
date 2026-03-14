@@ -22,6 +22,11 @@ class Scope(str, Enum):
     local = "local"
 
 
+class WorkingDirMode(str, Enum):
+    cwd = "cwd"
+    justfile = "justfile"
+
+
 class RecipeDefault(BaseModel):
     """The default value of a recipe parameter.
 
@@ -78,6 +83,7 @@ class Source(BaseModel):
     scope: Scope
     path: Path
     recipes: list[Recipe]
+    working_dir_mode: WorkingDirMode = WorkingDirMode.cwd
 
     def run(self, recipe_name: str, args: Iterable[str] = ()) -> int:
         from justx.justfiles.exceptions import JustNotFoundError
@@ -85,7 +91,11 @@ class Source(BaseModel):
         just_bin = shutil.which("just")
         if just_bin is None:
             raise JustNotFoundError()
-        result = subprocess.run([just_bin, "--justfile", str(self.path), recipe_name, *args], check=False)
+        working_directory = self.path.parent if self.working_dir_mode == WorkingDirMode.justfile else Path.cwd()
+        result = subprocess.run(
+            [just_bin, "--justfile", str(self.path), "--working-directory", str(working_directory), recipe_name, *args],
+            check=False,
+        )
         return result.returncode
 
     def pretty_print(self, console: Console | None = None) -> None:

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
 from justx.justfiles.exceptions import JustInvocationError, JustNotFoundError
-from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source
+from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source, WorkingDirMode
 
 
 class JustfileParser:
@@ -26,8 +27,18 @@ class JustfileParser:
         binary = self._require_just()
         data = self._dump(binary, path)
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
+        working_dir_mode = self._parse_working_dir_mode(path)
 
-        return Source(name=path.stem, scope=scope, path=path, recipes=recipes)
+        return Source(name=path.stem, scope=scope, path=path, recipes=recipes, working_dir_mode=working_dir_mode)
+
+    def _parse_working_dir_mode(self, path: Path) -> WorkingDirMode:
+        _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
+
+        text = path.read_text()
+        m = _DIRECTIVE_RE.search(text)
+        if m and m.group(1) == "justfile":
+            return WorkingDirMode.justfile
+        return WorkingDirMode.cwd
 
     def _require_just(self) -> str:
         binary = shutil.which("just")

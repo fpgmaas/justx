@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import pytest
 
 from justx.justfiles.loader import JustxLoader
 from justx.justfiles.models import Scope
-
-DATA_JUSTFILE = Path(__file__).parent / "data" / "justfile"
 
 SIMPLE_JUSTFILE = """\
 # Do something
@@ -94,14 +91,15 @@ def test_load_local_just_files(tmp_home, tmp_cwd):
     assert config.local_sources[0].scope == Scope.local
 
 
-def test_load_with_real_fixture(tmp_home, tmp_cwd):
-    tmp_cwd.mkdir()
-    shutil.copy(DATA_JUSTFILE, tmp_cwd / "justfile")
+def test_load_with_real_fixture(local_dir, tmp_path):
 
-    config = JustxLoader().load(cwd=tmp_cwd, justx_home=tmp_home)
+    config = JustxLoader().load(cwd=local_dir, justx_home=tmp_path)
 
-    assert len(config.local_sources) == 1
-    source = config.local_sources[0]
-    assert source.scope == Scope.local
-    recipe_names = {r.name for r in source.recipes}
-    assert recipe_names == {"bootstrap", "upgrade-deps", "script1", "script2"}
+    assert len(config.local_sources) == 3
+    assert all(s.scope == Scope.local for s in config.local_sources)
+
+    by_name = {s.name: s for s in config.local_sources}
+
+    assert {r.name for r in by_name["justfile"].recipes} == {"bootstrap", "upgrade-deps", "script1", "script2"}
+    assert {r.name for r in by_name["expressions"].recipes} == {"run"}
+    assert {r.name for r in by_name["simple"].recipes} == {"greet", "date"}
