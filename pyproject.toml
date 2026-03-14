@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "A TUI command launcher built on top of just. Define recipes once, run them anywhere."
 authors = [{ name = "Florian Maas", email = "fpgmaas@gmail.com" }]
 readme = "README.md"
-keywords = ['python']
+keywords = ['justfile', 'just', 'task-runner', 'tui', 'cli', 'terminal', 'textual']
 requires-python = ">=3.10,<4.0"
 classifiers = [
     "Intended Audience :: Developers",

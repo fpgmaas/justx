@@ -14,7 +14,7 @@
 
 
 <p align="center">
-<bold>justx</bold> is a A TUI command launcher built on top of <a href = "https://github.com/casey/just">just</a>. Define recipes once, run them anywhere.
+<bold>justx</bold> is a TUI command launcher built on top of <a href = "https://github.com/casey/just">just</a>. Define recipes once, run them anywhere.
 </p>
 
 
