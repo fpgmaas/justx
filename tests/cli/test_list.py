@@ -11,7 +11,7 @@ from tests.utils import run_within_dir
 def test_list_no_sources(tmp_path: Path) -> None:
     runner = CliRunner()
     with run_within_dir(tmp_path):
-        result = runner.invoke(main, ["list"])
+        result = runner.invoke(main, ["list"], env={"JUSTX_HOME": str(tmp_path)})
     assert result.exit_code == 0
     assert "No justfiles found." in result.output
 
