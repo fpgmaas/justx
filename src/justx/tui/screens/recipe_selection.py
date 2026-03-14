@@ -27,13 +27,27 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     }
     #sources {
         width: 1fr;
+        margin-right: 1;
+        border: solid dodgerblue 40%;
+        border-title-color: dodgerblue 40%;
+    }
+    #sources:focus-within {
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
     }
     #recipes {
         width: 2fr;
+        border: solid dodgerblue 40%;
+        border-title-color: dodgerblue 40%;
+    }
+    #recipes:focus-within {
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
     }
     """
 
     BINDINGS: ClassVar = [
+        Binding("escape", "dismiss_screen", "Quit"),
         Binding("left", "focus_sources", "Sources"),
         Binding("right", "focus_recipes", "Recipes"),
     ]
@@ -74,6 +88,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def on_recipes_pane_recipe_details(self, message: RecipesPane.RecipeDetails) -> None:
         self.app.push_screen(RecipeDetailScreen(message.recipe, self._selected_source))
+
+    def action_dismiss_screen(self) -> None:
+        self.dismiss(None)
 
     def action_focus_sources(self) -> None:
         self.query_one(SourcesPane).focus()

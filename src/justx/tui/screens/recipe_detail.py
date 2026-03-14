@@ -19,7 +19,8 @@ class RecipeDetailScreen(Screen[None]):
     #dialog {
         width: 80;
         height: auto;
-        border: solid $accent;
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
         padding: 1 2;
         background: $surface;
     }
@@ -41,11 +42,7 @@ class RecipeDetailScreen(Screen[None]):
         color: $text-muted;
         padding-left: 2;
     }
-    .command-value {
-        color: $warning;
-        padding-left: 2;
-    }
-    .param-row {
+.param-row {
         height: auto;
         padding-left: 2;
     }
@@ -61,7 +58,8 @@ class RecipeDetailScreen(Screen[None]):
         self._source = source
 
     def compose(self) -> ComposeResult:
-        with Vertical(id="dialog"):
+        with Vertical(id="dialog") as dialog:
+            dialog.border_title = "Recipe Details"
             yield Label(self._recipe.name, id="name")
 
             if self._recipe.doc:
@@ -71,10 +69,6 @@ class RecipeDetailScreen(Screen[None]):
             if self._source is not None:
                 yield Label("Justfile", classes="section-header")
                 yield Label(str(self._source.path), classes="detail-muted")
-
-                yield Label("Command", classes="section-header")
-                cmd = self._build_command()
-                yield Label(cmd, classes="command-value")
 
             if self._recipe.dependencies:
                 yield Label("Dependencies", classes="section-header")
@@ -89,17 +83,6 @@ class RecipeDetailScreen(Screen[None]):
                 yield Label("none", classes="detail-muted")
 
         yield Footer()
-
-    def _build_command(self) -> str:
-        parts = ["just", "--justfile", str(self._source.path), self._recipe.name]
-        for param in self._recipe.parameters:
-            if param.kind == ParameterKind.required:
-                parts.append(f"<{param.name}>")
-            elif param.kind == ParameterKind.variadic:
-                parts.append(f"[{param.name}...]")
-            else:
-                parts.append(f"[{param.name}]")
-        return " ".join(parts)
 
     def _build_param_label(self, param) -> Label:
         kind_map = {
