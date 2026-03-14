@@ -2,14 +2,8 @@
   <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
 </p>
 
----
 
-[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/justx)](https://pypi.org/project/justx/)
-[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/justx)](https://pypistats.org/packages/justx)
-[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
+
 
 **justx** is a A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.
 

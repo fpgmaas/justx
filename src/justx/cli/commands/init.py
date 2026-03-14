@@ -13,7 +13,7 @@ from rich.markup import escape
 
 from justx.config import get_justx_home
 
-GITHUB_EXAMPLES_API = "https://api.github.com/repos/fpgmaas/justx/contents/examples?ref=dev"
+GITHUB_EXAMPLES_API = "https://api.github.com/repos/fpgmaas/justx/contents/examples?ref=main"
 
 USER_JUST_CONTENT = """\
 # User-defined recipes for justx
