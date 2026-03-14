@@ -27,11 +27,20 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     }
     #sources {
         width: 1fr;
+        margin-right: 1;
+        border: solid dodgerblue 40%;
+        border-title-color: dodgerblue 40%;
+    }
+    #sources:focus-within {
         border: solid dodgerblue;
         border-title-color: dodgerblue;
     }
     #recipes {
         width: 2fr;
+        border: solid dodgerblue 40%;
+        border-title-color: dodgerblue 40%;
+    }
+    #recipes:focus-within {
         border: solid dodgerblue;
         border-title-color: dodgerblue;
     }

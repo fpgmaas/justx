@@ -19,7 +19,8 @@ class RecipeDetailScreen(Screen[None]):
     #dialog {
         width: 80;
         height: auto;
-        border: solid $accent;
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
         padding: 1 2;
         background: $surface;
     }
@@ -57,7 +58,8 @@ class RecipeDetailScreen(Screen[None]):
         self._source = source
 
     def compose(self) -> ComposeResult:
-        with Vertical(id="dialog"):
+        with Vertical(id="dialog") as dialog:
+            dialog.border_title = "Recipe Details"
             yield Label(self._recipe.name, id="name")
 
             if self._recipe.doc:

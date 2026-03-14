@@ -27,6 +27,9 @@ class RecipesPane(ListView):
     .recipe-wrap {
         height: auto;
     }
+    ListItem {
+        margin-bottom: 1;
+    }
     """
 
     BINDINGS: ClassVar = [
