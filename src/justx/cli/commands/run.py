@@ -4,44 +4,33 @@ import sys
 
 import click
 
+from justx.cli.commands.helpers import find_source, parse_target
 from justx.justfiles.exceptions import JustNotFoundError
 from justx.justfiles.loader import JustxLoader
-from justx.justfiles.models import Source
 
 
 @click.command("run")
-@click.option("-g", "--global", "use_global", is_flag=True, default=False, help="Target global scope.")
-@click.option("-l", "--local", "use_local", is_flag=True, default=False, help="Target local scope.")
-@click.option(
-    "-G",
-    "--group",
-    "group",
-    default=None,
-    metavar="GROUP",
-    help="Justfile group name. Defaults to root justfile if omitted.",
-)
-@click.argument("recipe")
+@click.option("-g", "--global", "use_global", is_flag=True, default=False, help="Run from global sources.")
+@click.option("-l", "--local", "use_local", is_flag=True, default=False, help="Run from local sources.")
+@click.argument("target")
 @click.argument("args", nargs=-1)
-def run_cmd(use_global: bool, use_local: bool, group: str | None, recipe: str, args: tuple[str, ...]) -> None:
-    """Run a recipe without the TUI.
+def run_cmd(use_global: bool, use_local: bool, target: str, args: tuple[str, ...]) -> None:
+    """Run a recipe. Specify scope with -l or -g.
 
-    Exactly one of -l (local) or -g (global) is required.
-    Use -G to target a named group; omit for the root justfile.
-
-    Under the hood, justx resolves the justfile path and delegates to just directly.
-    For example, `justx run -g -G docker build <image-tag>` is equivalent to running
-    `just --justfile ~/.justx/docker.just --working-directory=. build <image-tag>`.
+    TARGET format: group:recipe or recipe for root justfile.
     """
     if use_global and use_local:
         raise click.UsageError("Cannot use -g and -l together.")  # noqa: TRY003
     if not use_global and not use_local:
-        raise click.UsageError("Specify scope: -l (local) or -g (global).")  # noqa: TRY003
+        raise click.UsageError("Specify scope with -l (local) or -g (global).")  # noqa: TRY003
 
     config = JustxLoader().load()
-    sources = config.global_sources if use_global else config.local_sources
-    source = _find_source(sources, group)
-
     scope = "global" if use_global else "local"
+    sources = config.global_sources if use_global else config.local_sources
+
+    group, recipe = parse_target(target)
+    source = find_source(sources, group)
+
     label = group or "root justfile"
     if source is None:
         raise click.ClickException(f"'{label}' not found in {scope} sources.")  # noqa: TRY003
@@ -50,12 +39,3 @@ def run_cmd(use_global: bool, use_local: bool, group: str | None, recipe: str, a
         sys.exit(source.run(recipe, args))
     except JustNotFoundError as e:
         raise click.ClickException(str(e)) from e
-
-
-def _find_source(sources: list[Source], group: str | None) -> Source | None:
-    for source in sources:
-        if group is None and source.name in ("justfile", "Justfile"):
-            return source
-        if group is not None and source.name == group:
-            return source
-    return None

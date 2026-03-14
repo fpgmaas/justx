@@ -3,26 +3,28 @@ from __future__ import annotations
 import click
 
 from justx.justfiles.loader import JustxLoader
-from justx.justfiles.models import Source
 
 
 @click.command("list")
-@click.option("-g", "--global", "global_only", is_flag=True, default=False, help="Show global sources only.")
-@click.option("-l", "--local", "local_only", is_flag=True, default=False, help="Show local sources only.")
-def list_cmd(global_only: bool, local_only: bool) -> None:
-    """List all discovered groups and their recipes."""
-    if global_only and local_only:
+@click.option("-g", "--global", "use_global", is_flag=True, default=False, help="List global sources only.")
+@click.option("-l", "--local", "use_local", is_flag=True, default=False, help="List local sources only.")
+@click.argument("group", required=False, default=None)
+def list_cmd(use_global: bool, use_local: bool, group: str | None) -> None:
+    """List recipes. Shows all scopes by default."""
+    if use_global and use_local:
         raise click.UsageError("Cannot use -g and -l together.")  # noqa: TRY003
 
     config = JustxLoader().load()
 
-    sources: list[Source] = []
+    if use_global:
+        sources = config.global_sources
+    elif use_local:
+        sources = config.local_sources
+    else:
+        sources = [*config.local_sources, *config.global_sources]
 
-    if not global_only:
-        sources.extend(config.local_sources)
-
-    if not local_only:
-        sources.extend(config.global_sources)
+    if group is not None:
+        sources = [s for s in sources if s.name == group]
 
     if not sources:
         click.echo("No justfiles found.")

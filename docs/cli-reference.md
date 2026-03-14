@@ -49,8 +49,14 @@ justx init --download-examples
 List all discovered groups and their recipes.
 
 ```
-justx list [OPTIONS]
+justx list [OPTIONS] [GROUP]
 ```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `GROUP` | Optional. Filter output to a single named justfile group (e.g. `docker`). |
 
 ### Options
 
@@ -59,7 +65,7 @@ justx list [OPTIONS]
 | `-g`, `--global` | Show global sources only |
 | `-l`, `--local` | Show local sources only |
 
-`-g` and `-l` are mutually exclusive. Without either flag, all sources (global and local) are listed.
+`-g` and `-l` are mutually exclusive. Without either flag, all sources (local then global) are listed.
 
 ### Examples
 
@@ -72,6 +78,9 @@ justx list -g
 
 # List only local recipes
 justx list -l
+
+# List only the global 'docker' group
+justx list -g docker
 ```
 
 ---
@@ -81,8 +90,15 @@ justx list -l
 Run a recipe without the TUI.
 
 ```
-justx run [OPTIONS] RECIPE [ARGS]...
+justx run (-g | -l) TARGET [ARGS]...
 ```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `TARGET` | Recipe to run. Use `group:recipe` to target a named justfile group, or `recipe` alone to target the root `justfile`. |
+| `ARGS` | Optional extra arguments passed through to `just`. |
 
 ### Options
 
@@ -90,7 +106,6 @@ justx run [OPTIONS] RECIPE [ARGS]...
 |--------|-------------|
 | `-g`, `--global` | Target the global scope |
 | `-l`, `--local` | Target the local scope |
-| `-G GROUP`, `--group GROUP` | Named justfile group (e.g. `docker`). Omit to target the root `justfile`. |
 
 Exactly one of `-g` or `-l` is required. They are mutually exclusive.
 
@@ -98,20 +113,20 @@ Exactly one of `-g` or `-l` is required. They are mutually exclusive.
 
 ```bash
 # Run 'greet' from the global root justfile, passing 'Alice' as an argument
-# Equivalent to `just --justfile ~/.justx/justfile --working-directory . greet Alice`
+# Equivalent to: just --justfile ~/.justx/justfile --working-directory . greet Alice
 justx run -g greet Alice
 
-# Run 'build' from the global 'docker' group with `my-image` as the tag
-# Equivalent to `just --justfile ~/.justx/docker.just --working-directory . build my-image`
-justx run -g -G docker build my-image
+# Run 'shell' from the global 'docker' group with `my-image` as the tag
+# Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
+justx run -g docker:shell my-image
 
 # Run the local 'test' recipe with extra pytest flags
-# Equivalent to `just test -x -v`
+# Equivalent to: just test -x -v
 justx run -l test -x -v
 
-# Run 'deploy' from the local 'deploy' group
-# Equivalent to `just --justfile .justx/deploy staging`
-justx run -l -G deploy staging
+# Run 'staging' from the local 'deploy' group
+# Equivalent to: just --justfile .justx/deploy.just --working-directory . staging
+justx run -l deploy:staging
 ```
 
 ---

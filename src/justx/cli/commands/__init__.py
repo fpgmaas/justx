@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from justx.cli.commands.check import check_cmd
 from justx.cli.commands.init import init_cmd
 from justx.cli.commands.list import list_cmd
