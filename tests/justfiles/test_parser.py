@@ -6,16 +6,11 @@ from justx.justfiles.models import ParameterKind, Scope
 from justx.justfiles.parser import JustfileParser
 
 
-@pytest.fixture
-def data_justfile() -> Path:
-    return Path(__file__).parent / "data" / "justfile"
-
-
-def test_parse_justfile(data_justfile):
-    source = JustfileParser().parse(data_justfile, Scope.local)
+def test_parse_justfile(example_justfile):
+    source = JustfileParser().parse(example_justfile, Scope.local)
 
     assert source.name == "justfile"
-    assert source.path == data_justfile
+    assert source.path == example_justfile
 
     recipes = {r.name: r for r in source.recipes}
     assert set(recipes) == {"bootstrap", "upgrade-deps", "script1", "script2"}
