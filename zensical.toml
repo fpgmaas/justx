@@ -1,0 +1,42 @@
+site_name = "justx"
+site_url = "https://fpgmaas.github.io/justx"
+site_description = "A TUI command launcher built on just — define recipes once, run them anywhere."
+site_author = "Florian Maas"
+repo_url = "https://github.com/fpgmaas/justx"
+repo_name = "fpgmaas/justx"
+edit_uri = "edit/main/docs/"
+copyright = "Maintained by <a href=\"https://fpgmaas.com\">fpgmaas</a>."
+
+features = [
+  "navigation.tabs",
+  "navigation.path",
+  "toc.follow",
+]
+
+nav = [
+  {"Home" = "index.md"},
+  {"Getting Started" = "getting-started.md"},
+  {"Configuration" = [
+    "configuration/index.md",
+    "configuration/global.md",
+    "configuration/local.md",
+    "configuration/directives.md",
+  ]},
+  {"CLI Reference" = "cli-reference.md"}
+]
+
+[[theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "white"
+accent = "deep orange"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "black"
+accent = "deep orange"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"

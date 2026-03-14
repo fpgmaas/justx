@@ -1,7 +1,5 @@
-docs/source
-ckit.yaml
-ckit2.yaml
-notebooks
+.claude
+.DS_Store
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 

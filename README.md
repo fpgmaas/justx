@@ -1,82 +1,95 @@
 <p align="center">
-  <img alt="ckit logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/ckit/main/docs/static/ckit-logo.svg">
+  <img alt="justx logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/justx/main/docs/static/justx-logo.svg">
 </p>
 
 ---
 
-[![Release](https://img.shields.io/github/v/release/fpgmaas/ckit)](https://img.shields.io/github/v/release/fpgmaas/ckit)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/ckit/main.yml?branch=main)](https://github.com/fpgmaas/ckit/actions/workflows/main.yml?query=branch%3Amain)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/ckit)](https://pypi.org/project/ckit/)
-[![codecov](https://codecov.io/gh/fpgmaas/ckit/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/ckit)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/ckit)](https://pypistats.org/packages/ckit)
-[![License](https://img.shields.io/github/license/fpgmaas/ckit)](https://img.shields.io/github/license/fpgmaas/ckit)
+[![Release](https://img.shields.io/github/v/release/fpgmaas/justx)](https://img.shields.io/github/v/release/fpgmaas/justx)
+[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/justx/main.yml?branch=main)](https://github.com/fpgmaas/justx/actions/workflows/main.yml?query=branch%3Amain)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/justx)](https://pypi.org/project/justx/)
+[![codecov](https://codecov.io/gh/fpgmaas/justx/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/justx)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/justx)](https://pypistats.org/packages/justx)
+[![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
 
-_ckit_ is a command line utility to help you organise and quickly run frequently used commands.
+**justx** is a A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.
 
 <p align="center">
-<img src="docs/static/ckit.gif"/>
+  <img src="https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif" alt="justx TUI demo"/>
 </p>
 
 ---
+
 <p align="center">
-  <a href="https://fpgmaas.github.io/ckit">Documentation</a> - <a href="https://github.com/fpgmaas/ckit-files/">Example configuration files</a>
+  <a href="https://fpgmaas.github.io/justx/">Documentation</a> &nbsp;·&nbsp;
+  <a href="https://pypi.org/project/justx/">PyPI</a>
 </p>
 
 ---
+
+## Installation
+
+```shell
+uv tool install justx   # recommended
+# or
+pip install justx
+```
+
+> **Prerequisite:** the [`just`](https://github.com/casey/just#installation) binary must be available on `$PATH`.
 
 ## Quickstart
 
-### Installation
-
-_ckit_ can be installed by running
+**1. Initialise your global recipe library:**
 
 ```shell
-pip install ckit
+justx init
 ```
 
-To get started, run
+This creates `~/.justx/` with a sample justfile to get you started. To pull in a richer set of ready-made recipes (git, docker, filesystem tools, and more), run:
 
-```bash
-ckit init
+```shell
+justx init --download-examples
 ```
 
-which will prompt to add a `ckit/ckit.yaml` file in the user's home directory for global commands, and/or a `ckit.yaml` file in the current directory for commands specific to the current project.  Alternatively, run
+**2. Launch the TUI:**
 
-```bash
-ckit init --download-global-defaults
+```shell
+justx
 ```
 
-to get started with a richer set of examples in the global configuration directory, see [ckit-files](https://github.com/fpgmaas/ckit-files/).
+Browse your recipes with the arrow keys and press `Enter` to run one. Press `q` to quit.
 
-To use _ckit_ to run any of the pre-configured commands, simply run
+## Global recipes
+
+**justx** supports global recipes; recipes that are available from anywhere on your machine, no matter which project you're in.
+
+Split them into topic-focused files if you like:
 
 ```
-ckit
+~/.justx/
+├── justfile        # everyday catch-all recipes
+├── git.just        # git workflows
+├── docker.just     # container management
+└── ssh.just        # remote connections
 ```
 
-## Configuration
+For example, `~/.justx/docker.just` might contain:
 
-_ckit_ can look for configuration in the following two locations:
-
-- In a `ckit.yaml` file in the current directory
-- In any `.yaml` file in the the global configuration directory, which is defaulted to `~/ckit`, but which can be overridden with the environment variable `CKIT_HOME`.
-
-An example `.yaml` file could look as follows:
-
-```yaml
-test:
-  my-command:
-    cmd: "echo Hello! My name is: $name. My favourite fruit is: $fruit"
-    echo: false
-    args:
-      - name
-      - fruit: apple
+```just
+# Run a container interactively with a shell
+shell image_tag:
+    docker run --rm -it --entrypoint bash {{image_tag}}
 ```
 
-Which adds the command group `test` wth a single command called `my-command`. When `my-command` is selected to be run, _ckit_ prompts the user for `name` and `fruit` before running the command specified in `cmd`, where `fruit` is defaulted to `apple` if the user does not give any input.
+**justx** discovers these automatically and makes them available everywhere on your system by running `justx` in your terminal.
 
-For more details, see the [configuration](https://fpgmaas.github.io/ckit/configuration) section of the documentation.
+You can also skip the TUI and run recipes directly with `justx run`:
+
+```shell
+# Run 'shell' from the global 'docker' source with `my-image` as the tag
+# Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
+justx run -g docker:shell my-image
+```
 
 ---
 
-Repository initiated with [fpgmaas/cookiecutter-poetry](https://github.com/fpgmaas/cookiecutter-poetry).
+For full configuration details, file discovery behaviour, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).
