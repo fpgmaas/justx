@@ -1,5 +1,9 @@
 # justx
 
+<p align="center">
+  <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
+</p>
+
 **A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.**
 
 ![justx TUI demo](https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif)
