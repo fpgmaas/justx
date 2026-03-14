@@ -8,7 +8,13 @@ Launch the interactive TUI.
 justx
 ```
 
-Discovers all global (`~/.justx/`) and local (`./`) justfiles, then opens the TUI. No options.
+Discovers all global (`~/.justx/` or `$JUSTX_HOME`) and local (`./`) justfiles, then opens the TUI.
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--version` | Show version and exit |
 
 ---
 

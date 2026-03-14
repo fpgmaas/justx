@@ -106,7 +106,7 @@ def _init_default(justx_home: Path, console: Console, stderr: Console) -> None:
     help="Download example justfiles from the justx GitHub repo into the justx home directory.",
 )
 def init_cmd(download_examples: bool) -> None:
-    """Initialize the ~/.justx directory with a sample user.just file."""
+    """Initialize the ~/.justx directory with a sample user.just file or by downloading examples from Github."""
     console = Console()
     stderr = Console(stderr=True)
 
