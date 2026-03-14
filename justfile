@@ -10,7 +10,7 @@ install:
 # Run code quality tools.
 check:
     @echo "🚀 Linting code: Running pre-commit"
-    pre-commit run -a
+    uv run pre-commit run -a
     @echo "🚀 Checking for dependency issues: Running deptry"
     uv run deptry src
 
