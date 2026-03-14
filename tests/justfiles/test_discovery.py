@@ -121,6 +121,27 @@ def test_justx_home_arg_takes_precedence_over_env_var(monkeypatch, tmp_path):
     assert result.global_paths == [arg_home / "dev.just"]
 
 
+def test_discover_global_justfile_extension(tmp_home, tmp_cwd):
+    tmp_cwd.mkdir()
+    _write_justfile(tmp_home / "ops.justfile")
+    _write_justfile(tmp_home / "dev.justfile")
+
+    result = JustxDiscovery().discover(cwd=tmp_cwd, justx_home=tmp_home)
+
+    assert set(result.global_paths) == {tmp_home / "ops.justfile", tmp_home / "dev.justfile"}
+    assert result.local_paths == []
+
+
+def test_discover_local_justfile_extension(tmp_home, tmp_cwd):
+    tmp_cwd.mkdir()
+    _write_justfile(tmp_cwd / ".justx" / "ci.justfile")
+
+    result = JustxDiscovery().discover(cwd=tmp_cwd, justx_home=tmp_home)
+
+    assert result.global_paths == []
+    assert result.local_paths == [tmp_cwd / ".justx" / "ci.justfile"]
+
+
 def test_default_home_is_dot_justx():
     assert Path.home() / ".justx" == DEFAULT_JUSTX_HOME
 
