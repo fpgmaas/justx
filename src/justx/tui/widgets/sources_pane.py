@@ -41,6 +41,7 @@ class SourcesPane(ListView):
         self._id_to_source: dict[str, Source] = {}
         items = self._build_items(config)
         super().__init__(*items, id="sources")
+        self.border_title = "Sources"
 
     def _build_items(self, config: JustxConfig) -> list[ListItem]:
         items: list[ListItem] = []

@@ -27,9 +27,13 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     }
     #sources {
         width: 1fr;
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
     }
     #recipes {
         width: 2fr;
+        border: solid dodgerblue;
+        border-title-color: dodgerblue;
     }
     """
 

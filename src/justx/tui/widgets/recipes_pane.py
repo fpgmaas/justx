@@ -46,6 +46,7 @@ class RecipesPane(ListView):
 
     def __init__(self) -> None:
         super().__init__(id="recipes")
+        self.border_title = "Recipes"
         self._recipes: list[Recipe] = []
 
     def set_source(self, source: Source) -> None:
