@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="justx logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/justx/dev/docs/static/justx-logo.svg">
+  <img alt="justx logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/justx/main/docs/static/justx-logo.svg">
 </p>
 
 ---
@@ -11,7 +11,7 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/justx)](https://pypistats.org/packages/justx)
 [![License](https://img.shields.io/github/license/fpgmaas/justx)](https://img.shields.io/github/license/fpgmaas/justx)
 
-**justx** is a TUI command launcher built on [just](https://github.com/casey/just). Define your recipes once and run them from anywhere on your system.
+**justx** is a A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.
 
 <p align="center">
   <img src="docs/static/placeholder.png" alt="justx TUI demo"/>

@@ -1,6 +1,6 @@
 # justx
 
-**A TUI command launcher built on [just](https://github.com/casey/just) — define recipes once, run them anywhere.**
+**A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.**
 
 ![justx TUI demo](static/placeholder.png)
 

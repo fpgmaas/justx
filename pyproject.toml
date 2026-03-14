@@ -1,7 +1,7 @@
 [project]
 name = "justx"
 version = "0.0.1"
-description = "This is a template repository for Python projects that use uv for their dependency management."
+description = "A TUI command launcher built on top of just. Define recipes once, run them anywhere."
 authors = [{ name = "Florian Maas", email = "fpgmaas@gmail.com" }]
 readme = "README.md"
 keywords = ['python']

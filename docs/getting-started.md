@@ -29,7 +29,7 @@ To populate `~/.justx/` with a set of example recipes, use `--download-examples`
 justx init --download-examples
 ```
 
-Available examples include `docker.just`, `git.just`, `kubernetes.just`, `uv.just`, and more. See a list of the avilable [examples](https://github.com/fpgmaas/justx/tree/dev/examples) on Github.
+Available examples include `docker.just`, `git.just`, `kubernetes.just`, `uv.just`, and more. See a list of the available [examples](https://github.com/fpgmaas/justx/tree/dev/examples) on Github.
 
 ## Launch the TUI
 
