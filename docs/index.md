@@ -1,4 +1,4 @@
-# justx
+<h1 hidden></h1>
 
 <p align="center">
   <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
