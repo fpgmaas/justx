@@ -40,3 +40,10 @@ primary = "black"
 accent = "deep orange"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to light mode"
+
+[theme]
+logo = "static/justx-icon.svg"
+
+[[extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/fpgmaas/justx"

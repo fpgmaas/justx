@@ -4,7 +4,10 @@
   <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
 </p>
 
-**A TUI command launcher built on top of [just](https://github.com/casey/just). Define recipes once, run them anywhere.**
+<p align="center">
+A TUI command launcher built on top of <a href = "https://github.com/casey/just">just</a>. Define recipes once, run them anywhere.
+</p>
+
 
 ![justx TUI demo](https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif)
 
