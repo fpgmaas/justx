@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="justx logo" width="460" height="300" src="https://raw.githubusercontent.com/fpgmaas/justx/main/docs/static/justx-logo.svg">
+  <img alt="justx logo" width="400" height="240" src="https://raw.githubusercontent.com/fpgmaas/justx/refs/heads/main/docs/static/justx-logo-path.svg">
 </p>
 
 ---
