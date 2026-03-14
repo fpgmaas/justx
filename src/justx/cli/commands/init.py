@@ -43,6 +43,61 @@ def _prompt_selection(files: list[dict]) -> list[dict]:
     return selected or []
 
 
+def _download_file(url: str, dest: Path, console: Console, stderr: Console) -> None:
+    """Download a single file to dest, skipping if it already exists."""
+    if dest.exists():
+        stderr.print(f"[yellow]WARNING:[/yellow] {escape(str(dest))} already exists. Skipping.")
+        return
+    urllib.request.urlretrieve(url, dest)  # noqa: S310
+    console.print(f"[green]Downloaded[/green] {escape(str(dest))}")
+
+
+def _init_from_examples(justx_home: Path, console: Console, stderr: Console) -> None:
+    """Download selected example justfiles from GitHub into justx_home."""
+    console.print(f"This will download example justfiles into [bold]{escape(str(justx_home))}[/bold].")
+    if not click.confirm("Proceed?", default=True):
+        console.print("Aborted.")
+        sys.exit(0)
+
+    justx_home.mkdir(parents=True, exist_ok=True)
+
+    console.print("Fetching example files from GitHub...")
+    try:
+        files = _fetch_example_files()
+    except (urllib.error.URLError, OSError) as exc:
+        stderr.print(f"[red]ERROR:[/red] Could not fetch examples: {exc}")
+        sys.exit(1)
+
+    if not files:
+        console.print("[yellow]No example files found.[/yellow]")
+        sys.exit(0)
+
+    selected = _prompt_selection(files)
+    if not selected:
+        console.print("No files selected.")
+        sys.exit(0)
+
+    for f in selected:
+        _download_file(f["download_url"], justx_home / f["name"], console, stderr)
+
+
+def _init_default(justx_home: Path, console: Console, stderr: Console) -> None:
+    """Create justx_home with a sample user.just file."""
+    user_just = justx_home / "user.just"
+    console.print(f"This will create [bold]{escape(str(justx_home))}[/bold] with a sample [cyan]user.just[/cyan].")
+    if not click.confirm("Proceed?", default=True):
+        console.print("Aborted.")
+        sys.exit(0)
+
+    if user_just.exists():
+        stderr.print(f"[yellow]WARNING:[/yellow] [cyan]{escape(str(user_just))}[/cyan] already exists. Skipping.")
+        sys.exit(0)
+
+    justx_home.mkdir(parents=True, exist_ok=True)
+    user_just.write_text(USER_JUST_CONTENT)
+    console.print(f"[green]Created[/green] {escape(str(user_just))}")
+
+
 @click.command("init")
 @click.option(
     "--home",
@@ -60,56 +115,11 @@ def init_cmd(home: str | None, download_examples: bool) -> None:
     """Initialize the ~/.justx directory with a sample user.just file."""
     console = Console()
     stderr = Console(stderr=True)
-
     justx_home = Path(home) if home else DEFAULT_JUSTX_HOME
 
     if download_examples:
-        console.print(f"This will download example justfiles into [bold]{escape(str(justx_home))}[/bold].")
-
-        if not click.confirm("Proceed?", default=True):
-            console.print("Aborted.")
-            sys.exit(0)
-
-        justx_home.mkdir(parents=True, exist_ok=True)
-
-        console.print("Fetching example files from GitHub...")
-        try:
-            files = _fetch_example_files()
-        except (urllib.error.URLError, OSError) as exc:
-            stderr.print(f"[red]ERROR:[/red] Could not fetch examples: {exc}")
-            sys.exit(1)
-
-        if not files:
-            console.print("[yellow]No example files found.[/yellow]")
-            sys.exit(0)
-
-        selected = _prompt_selection(files)
-        if not selected:
-            console.print("No files selected.")
-            sys.exit(0)
-
-        for f in selected:
-            dest = justx_home / f["name"]
-            if dest.exists():
-                stderr.print(f"[yellow]WARNING:[/yellow] {escape(str(dest))} already exists. Skipping.")
-                continue
-            urllib.request.urlretrieve(f["download_url"], dest)  # noqa: S310
-            console.print(f"[green]Downloaded[/green] {escape(str(dest))}")
+        _init_from_examples(justx_home, console, stderr)
     else:
-        user_just = justx_home / "user.just"
-
-        console.print(f"This will create [bold]{escape(str(justx_home))}[/bold] with a sample [cyan]user.just[/cyan].")
-
-        if not click.confirm("Proceed?", default=True):
-            console.print("Aborted.")
-            sys.exit(0)
-
-        if user_just.exists():
-            stderr.print(f"[yellow]WARNING:[/yellow] [cyan]{escape(str(user_just))}[/cyan] already exists. Skipping.")
-            sys.exit(0)
-
-        justx_home.mkdir(parents=True, exist_ok=True)
-        user_just.write_text(USER_JUST_CONTENT)
-        console.print(f"[green]Created[/green] {escape(str(user_just))}")
+        _init_default(justx_home, console, stderr)
 
     console.print("\nRun [bold]justx[/bold] to launch the TUI.")
