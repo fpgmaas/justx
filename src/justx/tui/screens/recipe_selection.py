@@ -38,6 +38,7 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     """
 
     BINDINGS: ClassVar = [
+        Binding("escape", "dismiss_screen", "Quit"),
         Binding("left", "focus_sources", "Sources"),
         Binding("right", "focus_recipes", "Recipes"),
     ]
@@ -78,6 +79,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def on_recipes_pane_recipe_details(self, message: RecipesPane.RecipeDetails) -> None:
         self.app.push_screen(RecipeDetailScreen(message.recipe, self._selected_source))
+
+    def action_dismiss_screen(self) -> None:
+        self.dismiss(None)
 
     def action_focus_sources(self) -> None:
         self.query_one(SourcesPane).focus()
