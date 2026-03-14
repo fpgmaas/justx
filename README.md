@@ -75,9 +75,9 @@ Split them into topic-focused files if you like:
 For example, `~/.justx/docker.just` might contain:
 
 ```just
-# Remove all stopped containers, unused images, and volumes
-prune:
-    docker system prune -a --volumes -f
+# Run a container interactively with a shell
+shell image_tag:
+    docker run --rm -it --entrypoint bash {{image_tag}}
 ```
 
 **justx** discovers these automatically and makes them available everywhere on your system by running `justx` in your terminal.
@@ -85,9 +85,9 @@ prune:
 You can also skip the TUI and run recipes directly with `justx run`:
 
 ```shell
-# Run 'build' from the global 'docker' group with `my-image` as the tag
-# Equivalent to: just --justfile ~/.justx/docker.just --working-directory . build my-image
-justx run -g -G docker build my-image
+# Run 'shell' from the global 'docker' group with `my-image` as the tag
+# Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
+justx run -g docker:shell my-image
 ```
 
 ---

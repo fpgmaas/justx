@@ -20,7 +20,7 @@ Store your frequently used commands as `just` recipes in `~/.justx/`, then run t
 ```bash
 # Run 'build' from the global 'docker' group with `my-image` as the tag
 # Equivalent to `just --justfile ~/.justx/docker.just --working-directory . build my-image`
-justx run -g -G docker build my-image
+justx run -g docker:build my-image
 ```
 
 See the [CLI Reference](cli-reference.md) for the full list of commands and options.
