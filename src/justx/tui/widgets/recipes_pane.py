@@ -56,16 +56,29 @@ class RecipesPane(ListView):
         for recipe in self._recipes:
             self.append(self._build_item(recipe))
 
+    @staticmethod
+    def _param_signature(recipe: Recipe) -> str:
+        return " ".join(f"<{p.name}>" for p in recipe.parameters)
+
     def _build_item(self, recipe: Recipe) -> ListItem:
+        meta = self._param_signature(recipe)
+        if recipe.dependencies:
+            dep_text = f"→ {', '.join(recipe.dependencies)}"
+            meta = f"{meta}  {dep_text}" if meta else dep_text
+
+        name_text = recipe.name
+        if meta:
+            name_text = f"{recipe.name} [dim]{meta}[/dim]"
+
         if recipe.doc:
             return ListItem(
                 Vertical(
-                    Label(recipe.name, classes="recipe-name"),
+                    Label(name_text, classes="recipe-name", markup=True),
                     Label(recipe.doc, classes="recipe-doc"),
                     classes="recipe-wrap",
                 )
             )
-        return ListItem(Label(recipe.name, classes="recipe-name"))
+        return ListItem(Label(name_text, classes="recipe-name", markup=True))
 
     def _highlighted_recipe(self) -> Recipe | None:
         if self.index is not None and self.index < len(self._recipes):
