@@ -5,6 +5,7 @@ from typing import ClassVar, NamedTuple
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
+from textual.message import Message
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Input
 
@@ -21,6 +22,12 @@ class Selection(NamedTuple):
 
 
 class SearchInput(Input):
+    class Submitted(Message):
+        """Posted when the user confirms (Enter or Down)."""
+
+    class Cancelled(Message):
+        """Posted when the user cancels (Escape). Input is cleared before posting."""
+
     BINDINGS: ClassVar = [
         Binding("enter", "focus_sources", "Confirm"),
         Binding("down", "focus_sources", show=False),
@@ -28,11 +35,11 @@ class SearchInput(Input):
     ]
 
     def action_focus_sources(self) -> None:
-        self.screen.query_one(SourcesPane).focus()
+        self.post_message(self.Submitted())
 
     def action_clear_and_focus(self) -> None:
         self.clear()
-        self.screen.query_one(SourcesPane).focus()
+        self.post_message(self.Cancelled())
 
 
 class RecipeSelectionScreen(Screen[Selection | None]):
@@ -121,6 +128,12 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def on_recipes_pane_recipe_details(self, message: RecipesPane.RecipeDetails) -> None:
         self.app.push_screen(RecipeDetailScreen(message.recipe, self._selected_source))
+
+    def on_search_input_submitted(self, message: SearchInput.Submitted) -> None:
+        self.action_focus_sources()
+
+    def on_search_input_cancelled(self, message: SearchInput.Cancelled) -> None:
+        self.action_focus_sources()
 
     def action_dismiss_screen(self) -> None:
         self.dismiss(None)
