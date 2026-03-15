@@ -28,17 +28,35 @@ class JustfileParser:
         data = self._dump(binary, path)
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
         working_dir_mode = self._parse_working_dir_mode(path)
+        working_dir = self._resolve_working_dir(path, working_dir_mode)
         name = path.stem.replace(".", "")
 
-        return Source(name=name, scope=scope, path=path, recipes=recipes, working_dir_mode=working_dir_mode)
+        return Source(name=name, scope=scope, path=path, recipes=recipes, working_dir=working_dir)
+
+    @staticmethod
+    def _resolve_working_dir(path: Path, mode: WorkingDirMode) -> Path:
+        """Resolve the working directory for a justfile source.
+
+        For CWD mode, returns the current working directory.
+        For PROJECT mode, returns the project root:
+          - If the file is inside a .justx/ directory, returns .justx/../ (parent of .justx/)
+          - Otherwise, returns the justfile's parent directory.
+        """
+        if mode == WorkingDirMode.CWD:
+            return Path.cwd()
+        # PROJECT mode
+        parent = path.parent
+        if parent.name == ".justx":
+            return parent.parent
+        return parent
 
     def _parse_working_dir_mode(self, path: Path) -> WorkingDirMode:
         _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
 
         text = path.read_text()
         m = _DIRECTIVE_RE.search(text)
-        if m and m.group(1) == "justfile":
-            return WorkingDirMode.JUSTFILE
+        if m and m.group(1) in ("project", "justfile"):
+            return WorkingDirMode.PROJECT
         return WorkingDirMode.CWD
 
     def _require_just(self) -> str:

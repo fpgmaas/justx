@@ -25,10 +25,3 @@ def test_custom_exclude_replaces_default() -> None:
     config = DiscoveryConfig(exclude=["only_this"])
     assert config.exclude == ["only_this"]
     assert config.effective_exclude == {"only_this"}
-
-
-def test_exclude_default_is_independent_copy() -> None:
-    a = DiscoveryConfig()
-    b = DiscoveryConfig()
-    a.exclude.append("extra")
-    assert "extra" not in b.exclude

@@ -25,7 +25,7 @@ class Scope(str, Enum):
 
 class WorkingDirMode(str, Enum):
     CWD = "cwd"
-    JUSTFILE = "justfile"
+    PROJECT = "project"
 
 
 class RecipeDefault(BaseModel):
@@ -94,7 +94,7 @@ class Source(BaseModel):
     scope: Scope
     path: Path
     recipes: list[Recipe]
-    working_dir_mode: WorkingDirMode = WorkingDirMode.CWD
+    working_dir: Path
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""
@@ -117,9 +117,8 @@ class Source(BaseModel):
         just_bin = shutil.which("just")
         if just_bin is None:
             raise JustNotFoundError()
-        working_directory = self.path.parent if self.working_dir_mode == WorkingDirMode.JUSTFILE else Path.cwd()
         result = subprocess.run(
-            [just_bin, "--justfile", str(self.path), "--working-directory", str(working_directory), recipe_name, *args],
+            [just_bin, "--justfile", str(self.path), "--working-directory", str(self.working_dir), recipe_name, *args],
             check=False,
         )
         return result.returncode
