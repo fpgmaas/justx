@@ -5,8 +5,9 @@ from typing import ClassVar, NamedTuple
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
+from textual.message import Message
 from textual.screen import Screen
-from textual.widgets import Footer, Header
+from textual.widgets import Footer, Header, Input
 
 from justx.justfiles.models import JustxConfig, Recipe, Source
 from justx.tui.screens.recipe import RecipeScreen
@@ -20,8 +21,36 @@ class Selection(NamedTuple):
     args: list[str]
 
 
+class SearchInput(Input):
+    class Submitted(Message):
+        """Posted when the user confirms (Enter or Down)."""
+
+    class Cancelled(Message):
+        """Posted when the user cancels (Escape). Input is cleared before posting."""
+
+    BINDINGS: ClassVar = [
+        Binding("enter", "focus_sources", "Confirm"),
+        Binding("down", "focus_sources", show=False),
+        Binding("escape", "clear_and_focus", "Cancel"),
+    ]
+
+    def action_focus_sources(self) -> None:
+        self.post_message(self.Submitted())
+
+    def action_clear_and_focus(self) -> None:
+        self.clear()
+        self.post_message(self.Cancelled())
+
+
 class RecipeSelectionScreen(Screen[Selection | None]):
     CSS = """
+    #search-input {
+        dock: top;
+        border: solid dodgerblue 40%;
+    }
+    #search-input:focus {
+        border: solid dodgerblue;
+    }
     Horizontal {
         height: 1fr;
     }
@@ -47,9 +76,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     """
 
     BINDINGS: ClassVar = [
-        Binding("escape", "dismiss_screen", "Quit"),
         Binding("left", "focus_sources", "Sources"),
         Binding("right", "focus_recipes", "Recipes"),
+        Binding("s", "focus_search", "Search", show=True),
     ]
 
     def __init__(self, config: JustxConfig) -> None:
@@ -59,10 +88,21 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def compose(self) -> ComposeResult:
         yield Header()
+        yield SearchInput(placeholder="Search recipes...", id="search-input")
         with Horizontal():
             yield SourcesPane(self._config)
             yield RecipesPane()
         yield Footer()
+
+    def on_mount(self) -> None:
+        self.query_one(SourcesPane).focus()
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        query = event.value.strip()
+        sources_pane = self.query_one(SourcesPane)
+        recipes_pane = self.query_one(RecipesPane)
+        sources_pane.filter(query)
+        recipes_pane.filter(query)
 
     def on_sources_pane_source_selected(self, message: SourcesPane.SourceSelected) -> None:
         self._selected_source = message.source
@@ -89,6 +129,12 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     def on_recipes_pane_recipe_details(self, message: RecipesPane.RecipeDetails) -> None:
         self.app.push_screen(RecipeDetailScreen(message.recipe, self._selected_source))
 
+    def on_search_input_submitted(self, message: SearchInput.Submitted) -> None:
+        self.action_focus_sources()
+
+    def on_search_input_cancelled(self, message: SearchInput.Cancelled) -> None:
+        self.action_focus_sources()
+
     def action_dismiss_screen(self) -> None:
         self.dismiss(None)
 
@@ -96,7 +142,7 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         self.query_one(SourcesPane).focus()
 
     def action_focus_recipes(self) -> None:
-        pane = self.query_one(RecipesPane)
-        pane.focus()
-        if pane.index is None and len(pane) > 0:
-            pane.index = 0
+        self.query_one(RecipesPane).focus_first_enabled()
+
+    def action_focus_search(self) -> None:
+        self.query_one("#search-input", Input).focus()

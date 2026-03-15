@@ -9,6 +9,7 @@ from textual.widgets import Label, ListItem, ListView
 
 from justx.justfiles.models import Recipe, Source
 from justx.justfiles.utils import group_recipes
+from justx.tui.utils import first_enabled_index
 
 
 class RecipeListItem(ListItem):
@@ -70,11 +71,24 @@ class RecipesPane(ListView):
     def __init__(self) -> None:
         super().__init__(id="recipes")
         self.border_title = "Recipes"
+        self._source: Source | None = None
+        self._query = ""
 
     def set_source(self, source: Source) -> None:
         """Replace recipe list when the source changes."""
+        self._source = source
+        self._rebuild()
+
+    def filter(self, query: str) -> None:
+        self._query = query
+        self._rebuild()
+
+    def _rebuild(self) -> None:
         self.clear()
-        visible = [r for r in source.recipes if not r.name.startswith("_")]
+        if self._source is None:
+            return
+
+        visible = self._source.filter_recipes(self._query)
         groups = group_recipes(visible)
         has_groups = not (len(groups) == 1 and groups[0].name is None)
 
@@ -88,6 +102,19 @@ class RecipesPane(ListView):
                 if has_groups and group_name is not None:
                     item.add_class("grouped")
                 self.append(item)
+
+        # Skip disabled group headers so the highlight lands on the first selectable recipe.
+        self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
+
+    def focus_first_enabled(self) -> None:
+        """Focus this pane and move the highlight to the first non-disabled item."""
+        self.focus()
+        if len(self) > 0:
+            idx = first_enabled_index(self)
+            if self.index is None or (
+                self.index != idx and (self.highlighted_child is None or self.highlighted_child.disabled)
+            ):
+                self.index = idx
 
     @staticmethod
     def _param_signature(recipe: Recipe) -> str:
