@@ -92,6 +92,21 @@ class Source(BaseModel):
     recipes: list[Recipe]
     working_dir_mode: WorkingDirMode = WorkingDirMode.cwd
 
+    def filter_recipes(self, query: str = "") -> list[Recipe]:
+        """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""
+        visible = [r for r in self.recipes if not r.name.startswith("_")]
+        if not query:
+            return visible
+        q = query.lower()
+        return [
+            r
+            for r in visible
+            if q in r.name.lower()
+            or (r.doc is not None and q in r.doc.lower())
+            or any(q in g.lower() for g in r.groups)
+            or q in self.name.lower()
+        ]
+
     def run(self, recipe_name: str, args: Iterable[str] = ()) -> int:
         from justx.justfiles.exceptions import JustNotFoundError
 

@@ -6,7 +6,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, Header
+from textual.widgets import Footer, Header, Input
 
 from justx.justfiles.models import JustxConfig, Recipe, Source
 from justx.tui.screens.recipe import RecipeScreen
@@ -20,8 +20,30 @@ class Selection(NamedTuple):
     args: list[str]
 
 
+class SearchInput(Input):
+    BINDINGS: ClassVar = [
+        Binding("enter", "focus_sources", "Confirm"),
+        Binding("down", "focus_sources", show=False),
+        Binding("escape", "clear_and_focus", "Cancel"),
+    ]
+
+    def action_focus_sources(self) -> None:
+        self.screen.query_one(SourcesPane).focus()
+
+    def action_clear_and_focus(self) -> None:
+        self.clear()
+        self.screen.query_one(SourcesPane).focus()
+
+
 class RecipeSelectionScreen(Screen[Selection | None]):
     CSS = """
+    #search-input {
+        dock: top;
+        border: solid dodgerblue 40%;
+    }
+    #search-input:focus {
+        border: solid dodgerblue;
+    }
     Horizontal {
         height: 1fr;
     }
@@ -47,9 +69,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     """
 
     BINDINGS: ClassVar = [
-        Binding("escape", "dismiss_screen", "Quit"),
         Binding("left", "focus_sources", "Sources"),
         Binding("right", "focus_recipes", "Recipes"),
+        Binding("s", "focus_search", "Search", show=True),
     ]
 
     def __init__(self, config: JustxConfig) -> None:
@@ -59,10 +81,24 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def compose(self) -> ComposeResult:
         yield Header()
+        yield SearchInput(placeholder="Search recipes...", id="search-input")
         with Horizontal():
             yield SourcesPane(self._config)
             yield RecipesPane()
         yield Footer()
+
+    def on_mount(self) -> None:
+        self.query_one(SourcesPane).focus()
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        query = event.value.strip()
+        recipes_pane = self.query_one(RecipesPane)
+        sources_pane = self.query_one(SourcesPane)
+        recipes_pane._query = query
+        sources_pane.filter(query)
+        # If the selected source didn't change (no SourceSelected fired), force rebuild
+        if self._selected_source is not None:
+            recipes_pane._rebuild()
 
     def on_sources_pane_source_selected(self, message: SourcesPane.SourceSelected) -> None:
         self._selected_source = message.source
@@ -100,3 +136,6 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         pane.focus()
         if pane.index is None and len(pane) > 0:
             pane.index = 0
+
+    def action_focus_search(self) -> None:
+        self.query_one("#search-input", Input).focus()

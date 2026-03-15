@@ -70,11 +70,24 @@ class RecipesPane(ListView):
     def __init__(self) -> None:
         super().__init__(id="recipes")
         self.border_title = "Recipes"
+        self._source: Source | None = None
+        self._query = ""
 
     def set_source(self, source: Source) -> None:
         """Replace recipe list when the source changes."""
+        self._source = source
+        self._rebuild()
+
+    def filter(self, query: str) -> None:
+        self._query = query
+        self._rebuild()
+
+    def _rebuild(self) -> None:
         self.clear()
-        visible = [r for r in source.recipes if not r.name.startswith("_")]
+        if self._source is None:
+            return
+
+        visible = self._source.filter_recipes(self._query)
         groups = group_recipes(visible)
         has_groups = not (len(groups) == 1 and groups[0].name is None)
 

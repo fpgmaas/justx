@@ -234,6 +234,3 @@ test-release-workflow:
 # mode: makefile
 # End:
 # vim: set ft=make :
-
-hello-world:
- echo Hello world!

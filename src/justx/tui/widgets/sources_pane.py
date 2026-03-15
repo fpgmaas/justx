@@ -1,12 +1,20 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.binding import Binding
 from textual.message import Message
 from textual.widgets import Label, ListItem, ListView
 
 from justx.justfiles.models import JustxConfig, Source
+
+
+class SourceListItem(ListItem):
+    """A ListItem that carries a reference to its Source."""
+
+    def __init__(self, *args: Any, source: Source, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.source = source
 
 
 class SourcesPane(ListView):
@@ -38,36 +46,47 @@ class SourcesPane(ListView):
         """Emitted when the user confirms a source (Enter key)."""
 
     def __init__(self, config: JustxConfig) -> None:
-        self._id_to_source: dict[str, Source] = {}
-        items = self._build_items(config)
-        super().__init__(*items, id="sources")
+        self._config = config
+        self._query = ""
+        super().__init__(id="sources")
         self.border_title = "Sources"
 
-    def _build_items(self, config: JustxConfig) -> list[ListItem]:
-        items: list[ListItem] = []
+    def on_mount(self) -> None:
+        self._rebuild()
+
+    def filter(self, query: str) -> None:
+        self._query = query
+        self._rebuild()
+
+    def _rebuild(self) -> None:
+        self.clear()
+
+        local_sources = [s for s in self._config.local_sources if s.filter_recipes(self._query)]
+        global_sources = [s for s in self._config.global_sources if s.filter_recipes(self._query)]
 
         def make_header(title: str) -> ListItem:
             item = ListItem(Label(f" {title} "), classes="header")
             item.disabled = True
             return item
 
-        items.append(make_header("Local"))
-        for i, source in enumerate(config.local_sources):
-            item_id = f"source-l{i}"
-            self._id_to_source[item_id] = source
-            items.append(ListItem(Label(f"  {source.name}"), id=item_id))
+        if local_sources:
+            self.append(make_header("Local"))
+            for source in local_sources:
+                self.append(SourceListItem(Label(f"  {source.name}"), source=source))
 
-        items.append(make_header("Global"))
-        for i, source in enumerate(config.global_sources):
-            item_id = f"source-g{i}"
-            self._id_to_source[item_id] = source
-            items.append(ListItem(Label(f"  {source.name}"), id=item_id))
+        if global_sources:
+            self.append(make_header("Global"))
+            for source in global_sources:
+                self.append(SourceListItem(Label(f"  {source.name}"), source=source))
 
-        return items
+        if len(self) > 0:
+            self.index = 0
+        else:
+            self.index = None
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
-        if event.item and (source := self._id_to_source.get(event.item.id or "")):
-            self.post_message(self.SourceSelected(source))
+        if isinstance(event.item, SourceListItem):
+            self.post_message(self.SourceSelected(event.item.source))
 
     def action_activate(self) -> None:
         self.post_message(self.SourceActivated())
