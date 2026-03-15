@@ -26,11 +26,19 @@ jobs:
         run: just check
 
   tests-and-type-check:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os:
+          - name: linux
+            image: ubuntu-24.04
+          - name: macos
+            image: macos-26
+          - name: windows
+            image: windows-2025
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
       fail-fast: false
+    runs-on: ${{ matrix.os.image }}
+    name: ${{ matrix.os.name }} (${{ matrix.python-version }})
     defaults:
       run:
         shell: bash
@@ -46,9 +54,9 @@ jobs:
       - name: Run tests
         run: uv run python -m pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
 
-      - name: Upload coverage reports to Codecov with GitHub Action on Python 3.11
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
-        if: ${{ matrix.python-version == '3.11' }}
+        if: ${{ matrix.os.name == 'linux' && matrix.python-version == '3.14' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
