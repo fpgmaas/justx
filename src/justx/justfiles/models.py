@@ -70,6 +70,10 @@ class Recipe(BaseModel):
     dependencies: list[str]
     groups: list[str] = []
 
+    @property
+    def private(self) -> bool:
+        return self.name.startswith("_")
+
 
 class RecipeGroup(NamedTuple):
     name: str | None
@@ -94,7 +98,7 @@ class Source(BaseModel):
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""
-        visible = [r for r in self.recipes if not r.name.startswith("_")]
+        visible = [r for r in self.recipes if not r.private]
         if not query:
             return visible
         q = query.lower()
