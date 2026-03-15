@@ -1,3 +1,7 @@
+> **⚠️ This package is deprecated.**
+> `ckit` has been renamed to **[justx](https://github.com/fpgmaas/justx)** and now leverages [just](https://github.com/casey/just)'s justfiles instead of custom YAML syntax.
+
+
 <p align="center">
   <h1>ckit</h1>
 </p>
