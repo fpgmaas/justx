@@ -5,6 +5,7 @@ import subprocess
 from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
+from typing import NamedTuple
 
 from pydantic import BaseModel
 from rich.console import Console
@@ -68,6 +69,11 @@ class Recipe(BaseModel):
     parameters: list[Parameter]
     dependencies: list[str]
     groups: list[str] = []
+
+
+class RecipeGroup(NamedTuple):
+    name: str | None
+    recipes: list[Recipe]
 
 
 class Source(BaseModel):

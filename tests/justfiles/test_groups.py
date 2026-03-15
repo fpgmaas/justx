@@ -4,7 +4,7 @@ from pathlib import Path
 
 from justx.justfiles.models import Recipe, Scope
 from justx.justfiles.parser import JustfileParser
-from justx.tui.widgets.recipes_pane import RecipesPane
+from justx.justfiles.utils import group_recipes
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 GROUPS_JUST = DATA_DIR / "local" / ".justx" / "groups.just"
@@ -62,32 +62,32 @@ def _recipe(name: str, groups: list[str] | None = None) -> Recipe:
 
 def test_group_recipes_with_groups():
     recipes = [_recipe("build", ["dev"]), _recipe("test", ["test"])]
-    result = RecipesPane._group_recipes(recipes)
+    result = group_recipes(recipes)
     assert result == [("dev", [recipes[0]]), ("test", [recipes[1]])]
 
 
 def test_group_recipes_no_groups():
     recipes = [_recipe("lint"), _recipe("fmt")]
-    result = RecipesPane._group_recipes(recipes)
+    result = group_recipes(recipes)
     assert result == [(None, recipes)]
 
 
 def test_group_recipes_mixed():
     build = _recipe("build", ["dev"])
     lint = _recipe("lint")
-    result = RecipesPane._group_recipes([build, lint])
+    result = group_recipes([build, lint])
     assert result == [(None, [lint]), ("dev", [build])]
 
 
 def test_group_recipes_preserves_order_within_group():
     build = _recipe("build", ["dev"])
     watch = _recipe("watch", ["dev"])
-    result = RecipesPane._group_recipes([build, watch])
+    result = group_recipes([build, watch])
     assert result == [("dev", [build, watch])]
 
 
 def test_group_recipes_empty_list():
-    assert RecipesPane._group_recipes([]) == []
+    assert group_recipes([]) == []
 
 
 # ---------------------------------------------------------------------------

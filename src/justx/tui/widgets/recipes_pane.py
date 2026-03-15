@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.binding import Binding
 from textual.containers import Vertical
@@ -8,6 +8,15 @@ from textual.message import Message
 from textual.widgets import Label, ListItem, ListView
 
 from justx.justfiles.models import Recipe, Source
+from justx.justfiles.utils import group_recipes
+
+
+class RecipeListItem(ListItem):
+    """A ListItem that carries a reference to its Recipe."""
+
+    def __init__(self, *args: Any, recipe: Recipe, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.recipe = recipe
 
 
 class RecipesPane(ListView):
@@ -66,8 +75,8 @@ class RecipesPane(ListView):
         """Replace recipe list when the source changes."""
         self.clear()
         visible = [r for r in source.recipes if not r.name.startswith("_")]
-        groups = self._group_recipes(visible)
-        has_groups = any(g is not None for g, _ in groups)
+        groups = group_recipes(visible)
+        has_groups = not (len(groups) == 1 and groups[0].name is None)
 
         for group_name, recipes in groups:
             if has_groups and group_name is not None:
@@ -81,65 +90,33 @@ class RecipesPane(ListView):
                 self.append(item)
 
     @staticmethod
-    def _group_recipes(recipes: list[Recipe]) -> list[tuple[str | None, list[Recipe]]]:
-        """Group recipes by group name, alphabetically, ungrouped last.
-
-        Returns a list of (group_name, recipes) tuples. If no recipes have
-        groups, returns [(None, recipes)] for flat-list behavior.
-        """
-        if not recipes:
-            return []
-
-        any_grouped = any(r.groups for r in recipes)
-        if not any_grouped:
-            return [(None, recipes)]
-
-        seen_groups: dict[str, list[Recipe]] = {}
-        ungrouped: list[Recipe] = []
-
-        for recipe in recipes:
-            if recipe.groups:
-                for group in recipe.groups:
-                    seen_groups.setdefault(group, []).append(recipe)
-            else:
-                ungrouped.append(recipe)
-
-        result: list[tuple[str | None, list[Recipe]]] = []
-        if ungrouped:
-            result.append((None, ungrouped))
-        result.extend((name, seen_groups[name]) for name in sorted(seen_groups))
-        return result
-
-    @staticmethod
     def _param_signature(recipe: Recipe) -> str:
         return " ".join(f"<{p.name}>" for p in recipe.parameters)
 
-    def _build_item(self, recipe: Recipe) -> ListItem:
-        meta = self._param_signature(recipe)
+    def _build_item(self, recipe: Recipe) -> RecipeListItem:
+        parts: list[str] = []
+        if recipe.parameters:
+            parts.append(self._param_signature(recipe))
         if recipe.dependencies:
-            dep_text = f"→ {', '.join(recipe.dependencies)}"
-            meta = f"{meta}  {dep_text}" if meta else dep_text
+            parts.append(f"→ {', '.join(recipe.dependencies)}")
+        meta = "  ".join(parts)
 
-        name_text = recipe.name
-        if meta:
-            name_text = f"{recipe.name} [dim]{meta}[/dim]"
+        name_text = f"{recipe.name} [dim]{meta}[/dim]" if meta else recipe.name
 
         if recipe.doc:
-            item = ListItem(
-                Vertical(
-                    Label(name_text, classes="recipe-name", markup=True),
-                    Label(recipe.doc, classes="recipe-doc"),
-                    classes="recipe-wrap",
-                )
+            content = Vertical(
+                Label(name_text, classes="recipe-name", markup=True),
+                Label(recipe.doc, classes="recipe-doc"),
+                classes="recipe-wrap",
             )
         else:
-            item = ListItem(Label(name_text, classes="recipe-name", markup=True))
+            content = Label(name_text, classes="recipe-name", markup=True)
 
-        item._recipe = recipe  # type: ignore[attr-defined]
-        return item
+        return RecipeListItem(content, recipe=recipe)
 
     def _highlighted_recipe(self) -> Recipe | None:
-        return getattr(self.highlighted_child, "_recipe", None)
+        child = self.highlighted_child
+        return child.recipe if isinstance(child, RecipeListItem) else None
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         # Handles mouse clicks; keyboard Enter is intercepted by action_run
