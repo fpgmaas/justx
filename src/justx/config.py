@@ -12,3 +12,22 @@ def get_justx_home() -> Path:
     if env:
         return Path(env)
     return DEFAULT_JUSTX_HOME
+
+
+def get_global_justfile_candidates() -> list[Path]:
+    """Return candidate paths for the global justfile, in just's search order.
+
+    See https://just.systems/man/en/global-and-user-justfiles.html#global-justfile
+    """
+    if os.environ.get("JUSTX_SKIP_GLOBAL_JUSTFILE"):
+        return []
+
+    home = Path.home()
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    xdg_config = Path(xdg) if xdg else home / ".config"
+
+    return [
+        xdg_config / "just" / "justfile",
+        home / "justfile",
+        home / ".justfile",
+    ]

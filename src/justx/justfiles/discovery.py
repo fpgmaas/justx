@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from justx.config import get_justx_home
+from justx.config import get_global_justfile_candidates, get_justx_home
 
 
 @dataclass
@@ -37,11 +37,18 @@ class JustxDiscovery:
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []
-        root = home / "justfile"
-        if root.exists():
-            paths.append(root)
+        global_justfile = self._discover_default_global_justfile()
+        if global_justfile is not None:
+            paths.append(global_justfile)
         paths.extend(self._scan_just_files(home))
         return paths
+
+    def _discover_default_global_justfile(self) -> Path | None:
+        """Find the global justfile using just's search order."""
+        for candidate in get_global_justfile_candidates():
+            if candidate.is_file():
+                return candidate
+        return None
 
     def _discover_local(self, cwd: Path) -> list[Path]:
         paths: list[Path] = []

@@ -118,8 +118,8 @@ Exactly one of `-g` or `-l` is required. They are mutually exclusive.
 ### Examples
 
 ```bash
-# Run 'greet' from the global root justfile, passing 'Alice' as an argument
-# Equivalent to: just --justfile ~/.justx/justfile --working-directory . greet Alice
+# Run 'greet' from the global justfile, passing 'Alice' as an argument
+# Equivalent to: just --justfile ~/.config/just/justfile --working-directory . greet Alice
 justx run -g greet Alice
 
 # Run 'shell' from the global 'docker' source with `my-image` as the tag
@@ -153,7 +153,7 @@ Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just
 just: /usr/local/bin/just
 
 Global justfiles:
-  /Users/alice/.justx/justfile
+  /Users/alice/.config/just/justfile
   /Users/alice/.justx/docker.just
   /Users/alice/.justx/git.just
 

@@ -86,9 +86,9 @@ class RecipeDetailScreen(Screen[None]):
 
     def _build_param_label(self, param) -> Label:
         kind_map = {
-            ParameterKind.required: "required",
-            ParameterKind.optional: "optional",
-            ParameterKind.variadic: "variadic",
+            ParameterKind.REQUIRED: "required",
+            ParameterKind.OPTIONAL: "optional",
+            ParameterKind.VARIADIC: "variadic",
         }
         if param.default is None:
             default = ""
