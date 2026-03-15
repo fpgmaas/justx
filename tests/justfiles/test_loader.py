@@ -95,11 +95,12 @@ def test_load_with_real_fixture(local_dir, tmp_path):
 
     config = JustxLoader().load(cwd=local_dir, justx_home=tmp_path)
 
-    assert len(config.local_sources) == 3
+    assert len(config.local_sources) == 4
     assert all(s.scope == Scope.local for s in config.local_sources)
 
     by_name = {s.name: s for s in config.local_sources}
 
+    assert {r.name for r in by_name["groups"].recipes} == {"build", "lint", "test", "watch"}
     assert {r.name for r in by_name["justfile"].recipes} == {"bootstrap", "upgrade-deps", "script1", "script2"}
     assert {r.name for r in by_name["expressions"].recipes} == {"run"}
     assert {r.name for r in by_name["simple"].recipes} == {"greet", "date"}
