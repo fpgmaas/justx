@@ -79,10 +79,9 @@ class SourcesPane(ListView):
             for source in global_sources:
                 self.append(SourceListItem(Label(f"  {source.name}"), source=source))
 
-        if len(self) > 0:
-            self.index = 0
-        else:
-            self.index = None
+        from justx.tui.widgets import first_enabled_index
+
+        self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if isinstance(event.item, SourceListItem):

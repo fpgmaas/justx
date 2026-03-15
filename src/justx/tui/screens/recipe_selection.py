@@ -11,7 +11,7 @@ from textual.widgets import Footer, Header, Input
 from justx.justfiles.models import JustxConfig, Recipe, Source
 from justx.tui.screens.recipe import RecipeScreen
 from justx.tui.screens.recipe_detail import RecipeDetailScreen
-from justx.tui.widgets import RecipesPane, SourcesPane
+from justx.tui.widgets import RecipesPane, SourcesPane, first_enabled_index
 
 
 class Selection(NamedTuple):
@@ -134,8 +134,12 @@ class RecipeSelectionScreen(Screen[Selection | None]):
     def action_focus_recipes(self) -> None:
         pane = self.query_one(RecipesPane)
         pane.focus()
-        if pane.index is None and len(pane) > 0:
-            pane.index = 0
+        if len(pane) > 0:
+            idx = first_enabled_index(pane)
+            if pane.index is None or (
+                pane.index != idx and (pane.highlighted_child is None or pane.highlighted_child.disabled)
+            ):
+                pane.index = idx
 
     def action_focus_search(self) -> None:
         self.query_one("#search-input", Input).focus()

@@ -102,6 +102,10 @@ class RecipesPane(ListView):
                     item.add_class("grouped")
                 self.append(item)
 
+        from justx.tui.widgets import first_enabled_index
+
+        self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
+
     @staticmethod
     def _param_signature(recipe: Recipe) -> str:
         return " ".join(f"<{p.name}>" for p in recipe.parameters)
