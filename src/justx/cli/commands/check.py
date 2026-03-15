@@ -6,7 +6,9 @@ import sys
 import click
 from rich.console import Console
 from rich.markup import escape
+from rich.pretty import Pretty
 
+from justx.config import SettingsLoader, get_settings
 from justx.justfiles.discovery import JustxDiscovery
 
 
@@ -39,3 +41,18 @@ def check_cmd() -> None:
             console.print(f"  {escape(str(path))}")
     else:
         console.print("  (none)")
+
+    settings = get_settings()
+    loader = SettingsLoader()
+
+    console.print("\n[bold]Config:[/bold]")
+    if loader.global_path:
+        console.print(f"  global: {escape(str(loader.global_path))}")
+    else:
+        console.print("  global: [dim](not found)[/dim]")
+    if loader.local_path:
+        console.print(f"  local:  {escape(str(loader.local_path))}")
+    else:
+        console.print("  local:  [dim](not found)[/dim]")
+    console.print("\n[bold]Settings:[/bold]")
+    console.print(Pretty(settings.model_dump(), expand_all=True))
