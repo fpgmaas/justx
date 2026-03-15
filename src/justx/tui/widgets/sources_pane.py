@@ -7,6 +7,7 @@ from textual.message import Message
 from textual.widgets import Label, ListItem, ListView
 
 from justx.justfiles.models import JustxConfig, Source
+from justx.tui.utils import first_enabled_index
 
 
 class SourceListItem(ListItem):
@@ -78,8 +79,6 @@ class SourcesPane(ListView):
             self.append(make_header("Global"))
             for source in global_sources:
                 self.append(SourceListItem(Label(f"  {source.name}"), source=source))
-
-        from justx.tui.widgets import first_enabled_index
 
         self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
 

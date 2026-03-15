@@ -9,6 +9,7 @@ from textual.widgets import Label, ListItem, ListView
 
 from justx.justfiles.models import Recipe, Source
 from justx.justfiles.utils import group_recipes
+from justx.tui.utils import first_enabled_index
 
 
 class RecipeListItem(ListItem):
@@ -101,8 +102,6 @@ class RecipesPane(ListView):
                 if has_groups and group_name is not None:
                     item.add_class("grouped")
                 self.append(item)
-
-        from justx.tui.widgets import first_enabled_index
 
         # Skip disabled group headers so the highlight lands on the first selectable recipe.
         self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
