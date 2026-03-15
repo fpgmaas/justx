@@ -1,4 +1,4 @@
-> **⚠️ This package is deprecated.**
+> **⚠️ This package is no longer being maintained.**
 > `ckit` has been renamed to **[justx](https://github.com/fpgmaas/justx)** and now leverages [just](https://github.com/casey/just)'s justfiles instead of custom YAML syntax.
 
 
@@ -6,20 +6,10 @@
   <h1>ckit</h1>
 </p>
 
----
-
-[![Release](https://img.shields.io/github/v/release/fpgmaas/ckit)](https://img.shields.io/github/v/release/fpgmaas/ckit)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fpgmaas/ckit/main.yml?branch=main)](https://github.com/fpgmaas/ckit/actions/workflows/main.yml?query=branch%3Amain)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/ckit)](https://pypi.org/project/ckit/)
-[![codecov](https://codecov.io/gh/fpgmaas/ckit/branch/main/graph/badge.svg)](https://codecov.io/gh/fpgmaas/ckit)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/ckit)](https://pypistats.org/packages/ckit)
-[![License](https://img.shields.io/github/license/fpgmaas/ckit)](https://img.shields.io/github/license/fpgmaas/ckit)
 
 _ckit_ is a command line utility to help you organise and quickly run frequently used commands.
 
-<p align="center">
-<img src="docs/ckit.gif"/>
-</p>
+
 
 ## Quickstart
 
