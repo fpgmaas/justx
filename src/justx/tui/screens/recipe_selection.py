@@ -11,7 +11,7 @@ from textual.widgets import Footer, Header, Input
 from justx.justfiles.models import JustxConfig, Recipe, Source
 from justx.tui.screens.recipe import RecipeScreen
 from justx.tui.screens.recipe_detail import RecipeDetailScreen
-from justx.tui.widgets import RecipesPane, SourcesPane, first_enabled_index
+from justx.tui.widgets import RecipesPane, SourcesPane
 
 
 class Selection(NamedTuple):
@@ -129,15 +129,7 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         self.query_one(SourcesPane).focus()
 
     def action_focus_recipes(self) -> None:
-        """Focus recipes pane, correcting the highlight if it sits on a disabled group header."""
-        pane = self.query_one(RecipesPane)
-        pane.focus()
-        if len(pane) > 0:
-            idx = first_enabled_index(pane)
-            if pane.index is None or (
-                pane.index != idx and (pane.highlighted_child is None or pane.highlighted_child.disabled)
-            ):
-                pane.index = idx
+        self.query_one(RecipesPane).focus_first_enabled()
 
     def action_focus_search(self) -> None:
         self.query_one("#search-input", Input).focus()

@@ -106,6 +106,16 @@ class RecipesPane(ListView):
         # Skip disabled group headers so the highlight lands on the first selectable recipe.
         self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
 
+    def focus_first_enabled(self) -> None:
+        """Focus this pane and move the highlight to the first non-disabled item."""
+        self.focus()
+        if len(self) > 0:
+            idx = first_enabled_index(self)
+            if self.index is None or (
+                self.index != idx and (self.highlighted_child is None or self.highlighted_child.disabled)
+            ):
+                self.index = idx
+
     @staticmethod
     def _param_signature(recipe: Recipe) -> str:
         return " ".join(f"<{p.name}>" for p in recipe.parameters)
