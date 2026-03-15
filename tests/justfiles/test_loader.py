@@ -51,7 +51,7 @@ def test_load_local_root_justfile(tmp_home, tmp_cwd):
 
     assert config.global_sources == []
     assert len(config.local_sources) == 1
-    assert config.local_sources[0].name == "justfile"
+    assert config.local_sources[0].display_name == "justfile"
     assert config.local_sources[0].scope == Scope.LOCAL
 
 
@@ -62,7 +62,7 @@ def test_load_global_just_files(tmp_home, tmp_cwd):
 
     config = JustxLoader().load(cwd=tmp_cwd, justx_home=tmp_home)
 
-    names = {s.name for s in config.global_sources}
+    names = {s.display_name for s in config.global_sources}
     assert names == {"ops", "dev"}
     assert all(s.scope == Scope.GLOBAL for s in config.global_sources)
 
@@ -75,7 +75,7 @@ def test_load_local_just_files(tmp_home, tmp_cwd):
 
     assert config.global_sources == []
     assert len(config.local_sources) == 1
-    assert config.local_sources[0].name == "ci"
+    assert config.local_sources[0].display_name == "ci"
     assert config.local_sources[0].scope == Scope.LOCAL
 
 
@@ -86,7 +86,7 @@ def test_load_with_real_fixture(local_dir, tmp_path):
     assert len(config.local_sources) == 4
     assert all(s.scope == Scope.LOCAL for s in config.local_sources)
 
-    by_name = {s.name: s for s in config.local_sources}
+    by_name = {s.display_name: s for s in config.local_sources}
 
     assert {r.name for r in by_name["groups"].recipes} == {"build", "lint", "test", "watch"}
     assert {r.name for r in by_name["justfile"].recipes} == {"bootstrap", "upgrade-deps", "script1", "script2"}

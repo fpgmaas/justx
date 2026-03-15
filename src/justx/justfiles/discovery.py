@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from justx.config import get_global_justfile_candidates, get_justx_home
+from justx.config.settings.discovery import DiscoveryConfig
 
 
 @dataclass
@@ -15,7 +17,14 @@ class DiscoveredPaths:
 class JustxDiscovery:
     """Discovers justfile paths in global and local scopes."""
 
-    def discover(self, cwd: Path | None = None, justx_home: Path | None = None) -> DiscoveredPaths:
+    def __init__(self, config: DiscoveryConfig | None = None) -> None:
+        self._config = config or DiscoveryConfig()
+
+    def discover(
+        self,
+        cwd: Path | None = None,
+        justx_home: Path | None = None,
+    ) -> DiscoveredPaths:
         """Return all justfile paths found in the global and local scopes.
 
         Args:
@@ -56,7 +65,39 @@ class JustxDiscovery:
         if root.exists():
             paths.append(root)
         paths.extend(self._scan_just_files(cwd / ".justx"))
+        if self._config.recursive:
+            paths.extend(self._discover_local_recursive(cwd))
         return paths
+
+    def _discover_local_recursive(self, cwd: Path) -> list[Path]:
+        """Walk subdirectories of cwd up to max_depth, finding justfiles and .justx/ dirs."""
+        paths: list[Path] = []
+        config = self._config
+        exclude = config.effective_exclude
+
+        for current_dir, dirnames, _filenames in os.walk(cwd):
+            current = Path(current_dir)
+            depth = len(current.relative_to(cwd).parts)
+
+            # Skip the root directory (handled by flat discovery)
+            if depth == 0:
+                # Filter dirnames in-place to control os.walk traversal
+                dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
+                continue
+
+            if depth > config.max_depth:
+                dirnames.clear()
+                continue
+
+            # Filter dirnames for further traversal
+            dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
+
+            justfile = current / "justfile"
+            if justfile.exists():
+                paths.append(justfile)
+            paths.extend(self._scan_just_files(current / ".justx"))
+
+        return sorted(paths)
 
     def _scan_just_files(self, directory: Path) -> list[Path]:
         if not directory.is_dir():

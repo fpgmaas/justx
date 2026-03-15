@@ -13,8 +13,13 @@ from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefau
 class JustfileParser:
     """Parses justfiles into Source models by invoking just."""
 
-    def parse(self, path: Path, scope: Scope) -> Source:
+    def parse(self, path: Path, scope: Scope, display_name: str | None = None) -> Source:
         """Parse a justfile and return a Source.
+
+        Args:
+            path: Absolute path to the justfile.
+            scope: Whether this is a global or local justfile.
+            display_name: Display name override. If None, falls back to the file stem.
 
         Raises:
             FileNotFoundError: if the justfile does not exist.
@@ -29,9 +34,10 @@ class JustfileParser:
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
         working_dir_mode = self._parse_working_dir_mode(path)
         working_dir = self._resolve_working_dir(path, working_dir_mode)
-        name = path.stem.replace(".", "")
+        if display_name is None:
+            display_name = path.stem.replace(".", "")
 
-        return Source(name=name, scope=scope, path=path, recipes=recipes, working_dir=working_dir)
+        return Source(display_name=display_name, scope=scope, path=path, recipes=recipes, working_dir=working_dir)
 
     @staticmethod
     def _resolve_working_dir(path: Path, mode: WorkingDirMode) -> Path:

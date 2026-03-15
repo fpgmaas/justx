@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import click
 
+from justx.config import get_settings
 from justx.justfiles.loader import JustxLoader
 
 
@@ -14,7 +15,8 @@ def list_cmd(use_global: bool, use_local: bool, source: str | None) -> None:
     if use_global and use_local:
         raise click.UsageError("Cannot use -g and -l together.")  # noqa: TRY003
 
-    config = JustxLoader().load()
+    settings = get_settings()
+    config = JustxLoader(config=settings.discovery).load()
 
     if use_global:
         sources = config.global_sources
@@ -24,7 +26,7 @@ def list_cmd(use_global: bool, use_local: bool, source: str | None) -> None:
         sources = [*config.local_sources, *config.global_sources]
 
     if source is not None:
-        sources = [s for s in sources if s.name == source]
+        sources = [s for s in sources if s.display_name == source]
 
     if not sources:
         click.echo("No justfiles found.")

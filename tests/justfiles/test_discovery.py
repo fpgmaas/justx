@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from justx.config import DEFAULT_JUSTX_HOME
+from justx.config.settings.discovery import DiscoveryConfig
 from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 
 
@@ -230,6 +231,71 @@ def test_global_justfile_xdg_takes_precedence(fake_user_home, tmp_home):
 
     assert xdg_justfile in result.global_paths
     assert home_justfile not in result.global_paths
+
+
+# --- Recursive discovery ---
+
+
+def test_recursive_discovers_nested_justfile(monorepo_dir):
+    config = DiscoveryConfig(recursive=True)
+
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "frontend" / "justfile" in result.local_paths
+    assert monorepo_dir / "backend" / "justfile" in result.local_paths
+
+
+def test_recursive_discovers_nested_justx_dir(monorepo_dir):
+    config = DiscoveryConfig(recursive=True)
+
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "backend" / ".justx" / "api.just" in result.local_paths
+    assert monorepo_dir / "backend" / ".justx" / "ci.just" in result.local_paths
+
+
+def test_recursive_respects_max_depth(monorepo_dir):
+    # frontend/justfile is at depth 1, frontend/components/deep/justfile is at depth 3
+    config = DiscoveryConfig(recursive=True, max_depth=2)
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "frontend" / "justfile" in result.local_paths
+    assert monorepo_dir / "frontend" / "components" / "deep" / "justfile" not in result.local_paths
+
+
+def test_recursive_excludes_directories(monorepo_dir):
+    config = DiscoveryConfig(recursive=True)
+
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "frontend" / "justfile" in result.local_paths
+    assert monorepo_dir / "node_modules" / "pkg" / "justfile" not in result.local_paths
+
+
+def test_recursive_disabled_by_default(monorepo_dir):
+    result = JustxDiscovery().discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "frontend" / "justfile" not in result.local_paths
+
+
+def test_recursive_does_not_affect_global(monorepo_dir, global_dir):
+    config = DiscoveryConfig(recursive=True)
+
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir, justx_home=global_dir)
+
+    # Global discovery should remain flat — no recursion into subdirs of justx_home
+    for p in result.global_paths:
+        assert p.parent == global_dir or p.parent.parent != global_dir
+
+
+def test_recursive_nested_justx_scanned_flat(monorepo_dir):
+    """A .justx/ dir found during recursion should be scanned flat — no recursion into subdirs."""
+    config = DiscoveryConfig(recursive=True)
+
+    result = JustxDiscovery(config=config).discover(cwd=monorepo_dir)
+
+    assert monorepo_dir / "backend" / ".justx" / "ci.just" in result.local_paths
+    assert monorepo_dir / "backend" / ".justx" / "nested" / "bar.just" not in result.local_paths
 
 
 def test_global_justfile_xdg_env_override(monkeypatch, tmp_path):

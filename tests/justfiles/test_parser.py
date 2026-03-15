@@ -9,7 +9,7 @@ from justx.justfiles.parser import JustfileParser
 def test_parse_justfile(example_justfile):
     source = JustfileParser().parse(example_justfile, Scope.LOCAL)
 
-    assert source.name == "justfile"
+    assert source.display_name == "justfile"
     assert source.path == example_justfile
 
     recipes = {r.name: r for r in source.recipes}

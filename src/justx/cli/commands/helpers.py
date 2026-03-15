@@ -29,8 +29,8 @@ def find_source(sources: list[Source], source_name: str | None) -> Source | None
         source_name: The source name to match, or ``None`` to find the root justfile.
     """
     for source in sources:
-        if source_name is None and source.name in ("justfile", "Justfile"):
+        if source_name is None and source.display_name in ("justfile", "Justfile"):
             return source
-        if source_name is not None and source.name == source_name:
+        if source_name is not None and source.display_name == source_name:
             return source
     return None

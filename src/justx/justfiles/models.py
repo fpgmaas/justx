@@ -74,6 +74,15 @@ class Recipe(BaseModel):
     def private(self) -> bool:
         return self.name.startswith("_")
 
+    def matches(self, query: str) -> bool:
+        """Check if recipe matches a case-insensitive substring query."""
+        q = query.lower()
+        return (
+            q in self.name.lower()
+            or (self.doc is not None and q in self.doc.lower())
+            or any(q in g.lower() for g in self.groups)
+        )
+
 
 class RecipeGroup(NamedTuple):
     name: str | None
@@ -84,13 +93,13 @@ class Source(BaseModel):
     """A justfile source (global or local).
 
     Attributes:
-        name: Display name for the source.
+        display_name: Display name for the source.
         scope: Whether this is a global or local justfile.
         path: Absolute path to the justfile.
         recipes: Recipes defined in this justfile.
     """
 
-    name: str
+    display_name: str
     scope: Scope
     path: Path
     recipes: list[Recipe]
@@ -102,14 +111,7 @@ class Source(BaseModel):
         if not query:
             return visible
         q = query.lower()
-        return [
-            r
-            for r in visible
-            if q in r.name.lower()
-            or (r.doc is not None and q in r.doc.lower())
-            or any(q in g.lower() for g in r.groups)
-            or q in self.name.lower()
-        ]
+        return [r for r in visible if r.matches(query) or q in self.display_name.lower()]
 
     def run(self, recipe_name: str, args: Iterable[str] = ()) -> int:
         from justx.justfiles.exceptions import JustNotFoundError
@@ -127,7 +129,7 @@ class Source(BaseModel):
         console = console or Console()
         scope_label = self.scope.value
         console.print(
-            f"[bold]{escape(self.name)}[/bold]  [dim]\\[{scope_label}][/dim]  [dim]{escape(str(self.path))}[/dim]"
+            f"[bold]{escape(self.display_name)}[/bold]  [dim]\\[{scope_label}][/dim]  [dim]{escape(str(self.path))}[/dim]"
         )
         for recipe in self.recipes:
             params = " ".join(p.name for p in recipe.parameters)

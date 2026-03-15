@@ -26,7 +26,8 @@ def check_cmd() -> None:
 
     console.print(f"[bold]just:[/bold] [cyan]{escape(just_bin)}[/cyan]")
 
-    paths = JustxDiscovery().discover()
+    settings = get_settings()
+    paths = JustxDiscovery(config=settings.discovery).discover()
 
     console.print("\n[bold]Global justfiles:[/bold]")
     if paths.global_paths:
@@ -41,8 +42,6 @@ def check_cmd() -> None:
             console.print(f"  {escape(str(path))}")
     else:
         console.print("  (none)")
-
-    settings = get_settings()
     loader = SettingsLoader()
 
     console.print("\n[bold]Config:[/bold]")

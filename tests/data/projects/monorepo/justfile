@@ -1,0 +1,9 @@
+# Monorepo root justfile
+
+# Run all checks
+check-all:
+    echo "checking all"
+
+# Clean build artifacts
+clean:
+    echo "cleaning"
