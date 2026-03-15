@@ -6,10 +6,6 @@ from justx.justfiles.models import Recipe, Scope
 from justx.justfiles.parser import JustfileParser
 from justx.justfiles.utils import group_recipes
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-GROUPS_JUST = DATA_DIR / "local" / ".justx" / "groups.just"
-
-
 # ---------------------------------------------------------------------------
 # Parser tests
 # ---------------------------------------------------------------------------
@@ -41,8 +37,8 @@ def test_parse_recipe_without_group():
     assert recipe.groups == []
 
 
-def test_parse_groups_from_justfile():
-    source = JustfileParser().parse(GROUPS_JUST, Scope.local)
+def test_parse_groups_from_justfile(local_dir: Path):
+    source = JustfileParser().parse(local_dir / ".justx" / "groups.just", Scope.local)
     recipes = {r.name: r for r in source.recipes}
 
     assert recipes["build"].groups == ["dev"]
@@ -95,8 +91,8 @@ def test_group_recipes_empty_list():
 # ---------------------------------------------------------------------------
 
 
-def test_parsed_source_contains_groups():
-    source = JustfileParser().parse(GROUPS_JUST, Scope.local)
+def test_parsed_source_contains_groups(local_dir: Path):
+    source = JustfileParser().parse(local_dir / ".justx" / "groups.just", Scope.local)
     recipes = {r.name: r for r in source.recipes}
 
     assert set(recipes) == {"build", "watch", "test", "lint"}
