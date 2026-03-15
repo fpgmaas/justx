@@ -30,6 +30,7 @@ def fake_user_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     home = tmp_path / "fakehome"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
     monkeypatch.delenv("JUSTX_SKIP_GLOBAL_JUSTFILE", raising=False)
     return home
@@ -113,6 +114,7 @@ def test_justx_home_env_var(monkeypatch, tmp_path):
     home = tmp_path / "fakehome"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
 
     justx_home = tmp_path / "custom_home"
@@ -130,6 +132,7 @@ def test_justx_home_arg_takes_precedence_over_env_var(monkeypatch, tmp_path):
     home = tmp_path / "fakehome"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
 
     env_home = tmp_path / "env_home"
@@ -233,6 +236,7 @@ def test_global_justfile_xdg_env_override(monkeypatch, tmp_path):
     home = tmp_path / "fakehome"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.delenv("JUSTX_SKIP_GLOBAL_JUSTFILE", raising=False)
 
     custom_xdg = tmp_path / "custom_xdg"
