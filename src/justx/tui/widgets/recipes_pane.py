@@ -30,6 +30,17 @@ class RecipesPane(ListView):
     ListItem {
         margin-bottom: 0;
     }
+    RecipesPane > ListItem.header {
+        background: $panel;
+        color: $accent;
+        text-style: bold;
+    }
+    RecipesPane > ListItem.header:hover {
+        background: $panel;
+    }
+    RecipesPane > ListItem.grouped {
+        padding-left: 2;
+    }
     """
 
     BINDINGS: ClassVar = [
@@ -50,14 +61,54 @@ class RecipesPane(ListView):
     def __init__(self) -> None:
         super().__init__(id="recipes")
         self.border_title = "Recipes"
-        self._recipes: list[Recipe] = []
 
     def set_source(self, source: Source) -> None:
         """Replace recipe list when the source changes."""
         self.clear()
-        self._recipes = list(source.recipes)
-        for recipe in self._recipes:
-            self.append(self._build_item(recipe))
+        visible = [r for r in source.recipes if not r.name.startswith("_")]
+        groups = self._group_recipes(visible)
+        has_groups = any(g is not None for g, _ in groups)
+
+        for group_name, recipes in groups:
+            if has_groups and group_name is not None:
+                header = ListItem(Label(f" {group_name} "), classes="header")
+                header.disabled = True
+                self.append(header)
+            for recipe in recipes:
+                item = self._build_item(recipe)
+                if has_groups and group_name is not None:
+                    item.add_class("grouped")
+                self.append(item)
+
+    @staticmethod
+    def _group_recipes(recipes: list[Recipe]) -> list[tuple[str | None, list[Recipe]]]:
+        """Group recipes by group name, alphabetically, ungrouped last.
+
+        Returns a list of (group_name, recipes) tuples. If no recipes have
+        groups, returns [(None, recipes)] for flat-list behavior.
+        """
+        if not recipes:
+            return []
+
+        any_grouped = any(r.groups for r in recipes)
+        if not any_grouped:
+            return [(None, recipes)]
+
+        seen_groups: dict[str, list[Recipe]] = {}
+        ungrouped: list[Recipe] = []
+
+        for recipe in recipes:
+            if recipe.groups:
+                for group in recipe.groups:
+                    seen_groups.setdefault(group, []).append(recipe)
+            else:
+                ungrouped.append(recipe)
+
+        result: list[tuple[str | None, list[Recipe]]] = []
+        if ungrouped:
+            result.append((None, ungrouped))
+        result.extend((name, seen_groups[name]) for name in sorted(seen_groups))
+        return result
 
     @staticmethod
     def _param_signature(recipe: Recipe) -> str:
@@ -74,19 +125,21 @@ class RecipesPane(ListView):
             name_text = f"{recipe.name} [dim]{meta}[/dim]"
 
         if recipe.doc:
-            return ListItem(
+            item = ListItem(
                 Vertical(
                     Label(name_text, classes="recipe-name", markup=True),
                     Label(recipe.doc, classes="recipe-doc"),
                     classes="recipe-wrap",
                 )
             )
-        return ListItem(Label(name_text, classes="recipe-name", markup=True))
+        else:
+            item = ListItem(Label(name_text, classes="recipe-name", markup=True))
+
+        item._recipe = recipe  # type: ignore[attr-defined]
+        return item
 
     def _highlighted_recipe(self) -> Recipe | None:
-        if self.index is not None and self.index < len(self._recipes):
-            return self._recipes[self.index]
-        return None
+        return getattr(self.highlighted_child, "_recipe", None)
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         # Handles mouse clicks; keyboard Enter is intercepted by action_run

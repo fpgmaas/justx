@@ -67,6 +67,7 @@ class Recipe(BaseModel):
     doc: str | None
     parameters: list[Parameter]
     dependencies: list[str]
+    groups: list[str] = []
 
 
 class Source(BaseModel):
