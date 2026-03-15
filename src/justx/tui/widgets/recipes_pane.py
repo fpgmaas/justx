@@ -104,6 +104,7 @@ class RecipesPane(ListView):
 
         from justx.tui.widgets import first_enabled_index
 
+        # Skip disabled group headers so the highlight lands on the first selectable recipe.
         self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
 
     @staticmethod

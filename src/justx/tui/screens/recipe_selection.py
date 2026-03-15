@@ -92,13 +92,10 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     def on_input_changed(self, event: Input.Changed) -> None:
         query = event.value.strip()
-        recipes_pane = self.query_one(RecipesPane)
         sources_pane = self.query_one(SourcesPane)
-        recipes_pane._query = query
+        recipes_pane = self.query_one(RecipesPane)
         sources_pane.filter(query)
-        # If the selected source didn't change (no SourceSelected fired), force rebuild
-        if self._selected_source is not None:
-            recipes_pane._rebuild()
+        recipes_pane.filter(query)
 
     def on_sources_pane_source_selected(self, message: SourcesPane.SourceSelected) -> None:
         self._selected_source = message.source
@@ -132,6 +129,7 @@ class RecipeSelectionScreen(Screen[Selection | None]):
         self.query_one(SourcesPane).focus()
 
     def action_focus_recipes(self) -> None:
+        """Focus recipes pane, correcting the highlight if it sits on a disabled group header."""
         pane = self.query_one(RecipesPane)
         pane.focus()
         if len(pane) > 0:
