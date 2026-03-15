@@ -27,8 +27,8 @@ class JustxLoader:
         """
         paths = self._discovery.discover(cwd=cwd, justx_home=justx_home)
         return JustxConfig(
-            global_sources=self._parse_all(paths.global_paths, Scope.global_),
-            local_sources=self._parse_all(paths.local_paths, Scope.local),
+            global_sources=self._parse_all(paths.global_paths, Scope.GLOBAL),
+            local_sources=self._parse_all(paths.local_paths, Scope.LOCAL),
         )
 
     def _parse_all(self, paths: list[Path], scope: Scope) -> list[Source]:

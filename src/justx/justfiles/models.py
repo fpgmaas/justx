@@ -13,19 +13,19 @@ from rich.markup import escape
 
 
 class ParameterKind(str, Enum):
-    required = "required"
-    optional = "optional"
-    variadic = "variadic"
+    REQUIRED = "required"
+    OPTIONAL = "optional"
+    VARIADIC = "variadic"
 
 
 class Scope(str, Enum):
-    global_ = "global"
-    local = "local"
+    GLOBAL = "global"
+    LOCAL = "local"
 
 
 class WorkingDirMode(str, Enum):
-    cwd = "cwd"
-    justfile = "justfile"
+    CWD = "cwd"
+    JUSTFILE = "justfile"
 
 
 class RecipeDefault(BaseModel):
@@ -94,7 +94,7 @@ class Source(BaseModel):
     scope: Scope
     path: Path
     recipes: list[Recipe]
-    working_dir_mode: WorkingDirMode = WorkingDirMode.cwd
+    working_dir_mode: WorkingDirMode = WorkingDirMode.CWD
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""
@@ -117,7 +117,7 @@ class Source(BaseModel):
         just_bin = shutil.which("just")
         if just_bin is None:
             raise JustNotFoundError()
-        working_directory = self.path.parent if self.working_dir_mode == WorkingDirMode.justfile else Path.cwd()
+        working_directory = self.path.parent if self.working_dir_mode == WorkingDirMode.JUSTFILE else Path.cwd()
         result = subprocess.run(
             [just_bin, "--justfile", str(self.path), "--working-directory", str(working_directory), recipe_name, *args],
             check=False,

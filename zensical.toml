@@ -17,7 +17,6 @@ nav = [
   {"Home" = "index.md"},
   {"Getting Started" = "getting-started.md"},
   {"Configuration" = [
-    "configuration/index.md",
     "configuration/global.md",
     "configuration/local.md",
     "configuration/directives.md",

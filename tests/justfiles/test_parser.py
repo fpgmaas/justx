@@ -7,7 +7,7 @@ from justx.justfiles.parser import JustfileParser
 
 
 def test_parse_justfile(example_justfile):
-    source = JustfileParser().parse(example_justfile, Scope.local)
+    source = JustfileParser().parse(example_justfile, Scope.LOCAL)
 
     assert source.name == "justfile"
     assert source.path == example_justfile
@@ -25,10 +25,10 @@ def test_parse_justfile(example_justfile):
 
     args = recipes["script2"].parameters[0]
     assert args.name == "ARGS"
-    assert args.kind == ParameterKind.variadic
+    assert args.kind == ParameterKind.VARIADIC
     assert args.default is None
 
 
 def test_parse_justfile_not_found():
     with pytest.raises(FileNotFoundError):
-        JustfileParser().parse(Path("nonexistent/justfile"), Scope.local)
+        JustfileParser().parse(Path("nonexistent/justfile"), Scope.LOCAL)

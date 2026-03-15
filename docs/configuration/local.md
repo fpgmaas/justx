@@ -1,4 +1,4 @@
-# Local Configuration
+# Local Justfiles
 
 Local justfiles live alongside your project and are only loaded when justx is run from that directory (or a subdirectory). They are the right place for project-specific tasks: running tests, building artifacts, starting dev servers, deploying, and so on.
 

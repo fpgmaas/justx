@@ -28,8 +28,9 @@ class JustfileParser:
         data = self._dump(binary, path)
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
         working_dir_mode = self._parse_working_dir_mode(path)
+        name = path.stem.replace(".", "")
 
-        return Source(name=path.stem, scope=scope, path=path, recipes=recipes, working_dir_mode=working_dir_mode)
+        return Source(name=name, scope=scope, path=path, recipes=recipes, working_dir_mode=working_dir_mode)
 
     def _parse_working_dir_mode(self, path: Path) -> WorkingDirMode:
         _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
@@ -37,8 +38,8 @@ class JustfileParser:
         text = path.read_text()
         m = _DIRECTIVE_RE.search(text)
         if m and m.group(1) == "justfile":
-            return WorkingDirMode.justfile
-        return WorkingDirMode.cwd
+            return WorkingDirMode.JUSTFILE
+        return WorkingDirMode.CWD
 
     def _require_just(self) -> str:
         binary = shutil.which("just")
@@ -85,7 +86,7 @@ class JustfileParser:
     @staticmethod
     def _parameter_kind(just_kind: str, has_default: bool) -> ParameterKind:
         if just_kind in ("star", "plus"):
-            return ParameterKind.variadic
+            return ParameterKind.VARIADIC
         if has_default:
-            return ParameterKind.optional
-        return ParameterKind.required
+            return ParameterKind.OPTIONAL
+        return ParameterKind.REQUIRED

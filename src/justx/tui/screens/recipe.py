@@ -89,7 +89,7 @@ class RecipeScreen(Screen[list[str] | None]):
 
     def _build_param_row(self, param: Parameter) -> Horizontal:
         suffix = (
-            " *" if param.kind == ParameterKind.required else (" ..." if param.kind == ParameterKind.variadic else "")
+            " *" if param.kind == ParameterKind.REQUIRED else (" ..." if param.kind == ParameterKind.VARIADIC else "")
         )
         if param.default is None or param.default.expression:
             input_value = ""
