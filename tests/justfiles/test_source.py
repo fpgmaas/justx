@@ -24,13 +24,13 @@ def _source(
 def test_build_command_local_root():
     source = _source(scope=Scope.LOCAL)
     command = source._build_command("just", "build", [])
-    assert command == ["just", "--justfile", "/project/justfile", "build"]
+    assert command == ["just", "--justfile", str(Path("/project/justfile")), "build"]
 
 
 def test_build_command_local_root_with_args():
     source = _source(scope=Scope.LOCAL)
     command = source._build_command("just", "deploy", ["--force", "prod"])
-    assert command == ["just", "--justfile", "/project/justfile", "deploy", "--force", "prod"]
+    assert command == ["just", "--justfile", str(Path("/project/justfile")), "deploy", "--force", "prod"]
 
 
 def test_build_command_global(tmp_path, monkeypatch):
@@ -40,7 +40,7 @@ def test_build_command_global(tmp_path, monkeypatch):
     assert command == [
         "just",
         "--justfile",
-        "/home/user/.justx/ops.just",
+        str(Path("/home/user/.justx/ops.just")),
         "--working-directory",
         str(Path.cwd()),
         "status",
@@ -55,7 +55,7 @@ def test_build_command_module():
         root_justfile="/project/justfile",
     )
     command = source._build_command("just", "build", [])
-    assert command == ["just", "--justfile", "/project/justfile", "docker::build"]
+    assert command == ["just", "--justfile", str(Path("/project/justfile")), "docker::build"]
 
 
 def test_build_command_nested_module():
@@ -66,4 +66,4 @@ def test_build_command_nested_module():
         root_justfile="/project/justfile",
     )
     command = source._build_command("just", "staging", ["--dry-run"])
-    assert command == ["just", "--justfile", "/project/justfile", "infra::deploy::staging", "--dry-run"]
+    assert command == ["just", "--justfile", str(Path("/project/justfile")), "infra::deploy::staging", "--dry-run"]
