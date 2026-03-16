@@ -42,11 +42,13 @@ build:
 
 Additional sources in `.justx/` follow the same naming convention as global files — the file stem becomes the source name shown in the TUI.
 
-## Recursive discovery (monorepos)
+## Recursive discovery
 
 By default, justx only looks for justfiles in the current directory. For monorepos and multi-project repositories, you can enable **recursive discovery** so that justx walks subdirectories to find additional justfiles and `.justx/` recipe directories.
 
 Recursive discovery is enabled by setting `recursive = true` in a [config file](config-file.md). See the [config file reference](config-file.md) for all available options such as depth limits and exclusion patterns.
+
+Each discovered file runs relative to its own (sub)project root, just like root-level local files. For example, recipes in `services/api/.justx/deploy.just` run in `services/api/` by default.
 
 ### What gets scanned
 
