@@ -61,17 +61,17 @@ def test_parse_modules(module_justfile):
     assert {r.name for r in baz.recipes} == {"lint", "format"}
 
 
-def test_parse_modules_working_directories(module_justfile):
+def test_parse_modules_root_justfile(module_justfile):
     sources = JustfileParser().parse(module_justfile, Scope.LOCAL)
 
     root = sources[0]
-    assert root.working_dir == module_justfile.parent
+    assert root.root_justfile is None
 
     foo = sources[1]
-    assert foo.working_dir == module_justfile.parent / "bar"
+    assert foo.root_justfile == module_justfile
 
     baz = sources[2]
-    assert baz.working_dir == module_justfile.parent / "bar" / "baz"
+    assert baz.root_justfile == module_justfile
 
 
 def test_parse_no_modules(example_justfile):
