@@ -1,4 +1,5 @@
 mod foo 'bar/justfile'
+mod groups 'groups.just'
 
 # Build the project
 build:

@@ -39,8 +39,9 @@ def test_parse_justfile_not_found():
 
 def test_parse_modules(module_justfile):
     sources = JustfileParser().parse(module_justfile, Scope.LOCAL)
+    by_name = {s.display_name: s for s in sources}
 
-    assert len(sources) == 3
+    assert len(sources) == 4
 
     root = sources[0]
     assert root.display_name == "justfile"
@@ -48,30 +49,30 @@ def test_parse_modules(module_justfile):
     assert root.path == module_justfile
     assert {r.name for r in root.recipes} == {"build", "run"}
 
-    foo = sources[1]
-    assert foo.display_name == "foo"
+    foo = by_name["foo"]
     assert foo.module_path == "foo"
     assert foo.path == module_justfile.parent / "bar" / "justfile"
     assert {r.name for r in foo.recipes} == {"lint", "format"}
 
-    baz = sources[2]
-    assert baz.display_name == "foo::baz"
+    baz = by_name["foo::baz"]
     assert baz.module_path == "foo::baz"
     assert baz.path == module_justfile.parent / "bar" / "baz" / "justfile"
-    assert {r.name for r in baz.recipes} == {"lint", "format"}
+    assert {r.name for r in baz.recipes} == {"lint-baz", "format-baz"}
+
+    groups = by_name["groups"]
+    assert groups.module_path == "groups"
+    assert groups.path == module_justfile.parent / "groups.just"
+    assert {r.name for r in groups.recipes} == {"build", "watch", "test", "lint"}
 
 
 def test_parse_modules_root_justfile(module_justfile):
     sources = JustfileParser().parse(module_justfile, Scope.LOCAL)
+    by_name = {s.display_name: s for s in sources}
 
-    root = sources[0]
-    assert root.root_justfile is None
-
-    foo = sources[1]
-    assert foo.root_justfile == module_justfile
-
-    baz = sources[2]
-    assert baz.root_justfile == module_justfile
+    assert by_name["justfile"].root_justfile is None
+    assert by_name["foo"].root_justfile == module_justfile
+    assert by_name["foo::baz"].root_justfile == module_justfile
+    assert by_name["groups"].root_justfile == module_justfile
 
 
 def test_parse_no_modules(example_justfile):

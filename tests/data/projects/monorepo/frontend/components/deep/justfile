@@ -1,3 +1,0 @@
-# Deep justfile
-deep:
-    echo "deep"

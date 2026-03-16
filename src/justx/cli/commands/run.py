@@ -5,7 +5,6 @@ import sys
 import click
 
 from justx.cli.commands.helpers import find_source, parse_target
-from justx.config import load_settings
 from justx.justfiles.exceptions import JustNotFoundError
 from justx.justfiles.loader import JustxLoader
 
@@ -25,8 +24,7 @@ def run_cmd(use_global: bool, use_local: bool, target: str, args: tuple[str, ...
     if not use_global and not use_local:
         raise click.UsageError("Specify scope with -l (local) or -g (global).")  # noqa: TRY003
 
-    settings = load_settings()
-    config = JustxLoader(config=settings.discovery).load()
+    config = JustxLoader().load()
     scope = "global" if use_global else "local"
     sources = config.global_sources if use_global else config.local_sources
 

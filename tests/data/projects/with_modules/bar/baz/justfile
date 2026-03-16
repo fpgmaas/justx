@@ -1,8 +1,8 @@
 
 # Lint the code
-lint:
+lint-baz:
     echo "Linting code"
 
 # Format the code
-format:
+format-baz:
     echo "Formatting code"
