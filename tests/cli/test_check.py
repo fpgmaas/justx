@@ -22,7 +22,7 @@ def test_check_just_found_no_sources(tmp_path: Path) -> None:
         result = runner.invoke(main, ["check"], env={"JUSTX_HOME": str(tmp_path)})
     assert result.exit_code == 0
     assert "just" in result.output
-    assert "(none)" in result.output
+    assert "0 global, 0 local" in result.output
 
 
 def test_check_just_found_with_sources(local_dir: Path, global_dir: Path) -> None:
@@ -30,5 +30,24 @@ def test_check_just_found_with_sources(local_dir: Path, global_dir: Path) -> Non
     with run_within_dir(local_dir):
         result = runner.invoke(main, ["check"])
     assert result.exit_code == 0
-    assert "simple.just" in result.output  # local source
-    assert "justfile" in result.output  # global source
+    # Default mode shows counts, not individual paths
+    assert "global" in result.output
+    assert "local" in result.output
+
+
+def test_check_verbose_shows_paths(local_dir: Path, global_dir: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(local_dir):
+        result = runner.invoke(main, ["check", "-v"])
+    assert result.exit_code == 0
+    assert "simple.just" in result.output
+    assert "justfile" in result.output
+    assert "Settings" in result.output
+
+
+def test_check_verbose_shows_recipes(local_dir: Path, global_dir: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(local_dir):
+        result = runner.invoke(main, ["check", "-v"])
+    assert result.exit_code == 0
+    assert "Sources & recipes" in result.output

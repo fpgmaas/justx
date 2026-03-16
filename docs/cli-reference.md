@@ -139,24 +139,33 @@ justx run -l deploy:staging
 
 ## `justx check`
 
-Verify that `just` is installed and show discovered justfile paths.
+Verify that `just` is installed, show discovered justfile counts, and display configuration file locations.
 
 ```
-justx check
+justx check [OPTIONS]
 ```
 
-Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location followed by all discovered global and local justfile paths.
+Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location, a summary of discovered justfiles, and the config file path (if present).
 
-### Example output
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `-v`, `--verbose` | Show detailed discovery paths, sources with recipes, and full settings |
+
+### Default output
 
 ```
-just: /usr/local/bin/just
-
-Global justfiles:
-  /Users/alice/.config/just/justfile
-  /Users/alice/.justx/docker.just
-  /Users/alice/.justx/git.just
-
-Local justfiles:
-  /Users/alice/my-project/justfile
+just:      /usr/local/bin/just ✓
+justfiles: 3 global, 1 local
+config:    ./justx.toml
 ```
+
+### Verbose output
+
+With `-v`, the command additionally shows:
+
+- **Global justfiles** — full paths to each discovered global justfile
+- **Local justfiles** — full paths to each discovered local justfile
+- **Sources & recipes** — all loaded sources with their recipes
+- **Settings** — the fully resolved settings

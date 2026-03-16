@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from justx.config import get_global_justfile_candidates, get_justx_home
+from justx.config.settings.discovery import DiscoveryConfig
 
 
 @dataclass
@@ -15,7 +17,14 @@ class DiscoveredPaths:
 class JustxDiscovery:
     """Discovers justfile paths in global and local scopes."""
 
-    def discover(self, cwd: Path | None = None, justx_home: Path | None = None) -> DiscoveredPaths:
+    def __init__(self, config: DiscoveryConfig | None = None) -> None:
+        self._config = config or DiscoveryConfig()
+
+    def discover(
+        self,
+        cwd: Path | None = None,
+        justx_home: Path | None = None,
+    ) -> DiscoveredPaths:
         """Return all justfile paths found in the global and local scopes.
 
         Args:
@@ -37,15 +46,16 @@ class JustxDiscovery:
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []
-        global_justfile = self._discover_default_global_justfile()
+        global_justfile = self._discover_default_global_justfile(home)
         if global_justfile is not None:
             paths.append(global_justfile)
-        paths.extend(self._scan_just_files(home))
+        scanned = self._scan_just_files(home)
+        paths.extend(path for path in scanned if path != global_justfile)
         return paths
 
-    def _discover_default_global_justfile(self) -> Path | None:
+    def _discover_default_global_justfile(self, justx_home: Path) -> Path | None:
         """Find the global justfile using just's search order."""
-        for candidate in get_global_justfile_candidates():
+        for candidate in get_global_justfile_candidates(justx_home):
             if candidate.is_file():
                 return candidate
         return None
@@ -56,7 +66,38 @@ class JustxDiscovery:
         if root.exists():
             paths.append(root)
         paths.extend(self._scan_just_files(cwd / ".justx"))
+        if self._config.recursive:
+            paths.extend(self._discover_local_recursive(cwd))
         return paths
+
+    def _discover_local_recursive(self, cwd: Path) -> list[Path]:
+        """Walk subdirectories of cwd up to max_depth, finding justfiles and .justx/ dirs."""
+        paths: list[Path] = []
+        exclude = self._config.effective_exclude
+
+        for current_dir, dirnames, _filenames in os.walk(cwd):
+            current = Path(current_dir)
+            depth = len(current.relative_to(cwd).parts)
+
+            if depth > self._config.max_depth:
+                dirnames.clear()
+                continue
+
+            self._exclude_directories(dirnames, exclude)
+
+            if depth == 0:
+                continue
+
+            justfile = current / "justfile"
+            if justfile.exists():
+                paths.append(justfile)
+            paths.extend(self._scan_just_files(current / ".justx"))
+
+        return sorted(paths)
+
+    def _exclude_directories(self, dirnames: list[str], exclude: set[str]) -> None:
+        """Filter os.walk's dirnames in-place to prevent traversal into excluded directories."""
+        dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
 
     def _scan_just_files(self, directory: Path) -> list[Path]:
         if not directory.is_dir():

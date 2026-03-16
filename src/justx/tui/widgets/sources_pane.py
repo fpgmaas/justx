@@ -73,12 +73,12 @@ class SourcesPane(ListView):
         if local_sources:
             self.append(make_header("Local"))
             for source in local_sources:
-                self.append(SourceListItem(Label(f"  {source.name}"), source=source))
+                self.append(SourceListItem(Label(f"  {source.display_name}"), source=source))
 
         if global_sources:
             self.append(make_header("Global"))
             for source in global_sources:
-                self.append(SourceListItem(Label(f"  {source.name}"), source=source))
+                self.append(SourceListItem(Label(f"  {source.display_name}"), source=source))
 
         self.call_after_refresh(lambda: setattr(self, "index", first_enabled_index(self)))
 

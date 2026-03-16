@@ -18,6 +18,7 @@ Store your frequently used commands as `just` recipes in `~/.justx/`, then run t
 - **TUI launcher** — browse and run recipes interactively with a keyboard-driven interface
 - **Global & local scopes** — maintain a personal recipe library in `~/.justx/` alongside per-project justfiles
 - **Non-interactive mode** — `justx run` for scripting and CI pipelines
+- **Monorepo support** — recursively discover justfiles across sub-projects
 - **Zero config** — works with your existing justfiles.
 
 ## Non-interactive usage

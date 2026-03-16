@@ -14,8 +14,11 @@ def get_justx_home() -> Path:
     return DEFAULT_JUSTX_HOME
 
 
-def get_global_justfile_candidates() -> list[Path]:
+def get_global_justfile_candidates(justx_home: Path | None = None) -> list[Path]:
     """Return candidate paths for the global justfile, in just's search order.
+
+    Falls back to justx_home/justfile and justx_home/.justfile when no
+    standard global justfile is present.
 
     See https://just.systems/man/en/global-and-user-justfiles.html#global-justfile
     """
@@ -26,8 +29,12 @@ def get_global_justfile_candidates() -> list[Path]:
     xdg = os.environ.get("XDG_CONFIG_HOME")
     xdg_config = Path(xdg) if xdg else home / ".config"
 
+    resolved_justx_home = justx_home or get_justx_home()
+
     return [
         xdg_config / "just" / "justfile",
         home / "justfile",
         home / ".justfile",
+        resolved_justx_home / "justfile",
+        resolved_justx_home / ".justfile",
     ]
