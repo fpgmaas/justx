@@ -97,29 +97,3 @@ class SettingsLoader:
 def load_settings(cwd: Path | None = None, justx_home: Path | None = None) -> LocalSettings:
     """Load settings by layering: defaults -> global config -> local config."""
     return SettingsLoader(cwd, justx_home).load()
-
-
-# --- Cached access ---
-
-_settings: LocalSettings | None = None
-
-
-def init_settings(cwd: Path | None = None, justx_home: Path | None = None) -> LocalSettings:
-    """Load and cache settings. Call once at CLI startup."""
-    global _settings
-    _settings = load_settings(cwd, justx_home)
-    return _settings
-
-
-def get_settings() -> LocalSettings:
-    """Return cached settings, loading defaults if init wasn't called."""
-    global _settings
-    if _settings is None:
-        _settings = load_settings()
-    return _settings
-
-
-def reset_settings() -> None:
-    """Clear cached settings. Intended for tests."""
-    global _settings
-    _settings = None

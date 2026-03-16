@@ -5,10 +5,7 @@ from justx.config.settings import (
     GlobalSettings,
     LocalSettings,
     SettingsLoader,
-    get_settings,
-    init_settings,
     load_settings,
-    reset_settings,
 )
 
 __all__ = [
@@ -20,8 +17,5 @@ __all__ = [
     "SettingsLoader",
     "get_global_justfile_candidates",
     "get_justx_home",
-    "get_settings",
-    "init_settings",
     "load_settings",
-    "reset_settings",
 ]

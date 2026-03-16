@@ -7,12 +7,8 @@ import pytest
 from justx.config.settings.discovery import DEFAULT_EXCLUDE
 from justx.config.settings.main import (
     ConfigError,
-    LocalSettings,
     SettingsLoader,
-    get_settings,
-    init_settings,
     load_settings,
-    reset_settings,
 )
 
 
@@ -130,30 +126,3 @@ def test_loader_paths_none_when_missing(tmp_path: Path) -> None:
     loader = SettingsLoader(cwd=tmp_path, justx_home=tmp_path / "empty")
     assert loader.global_path is None
     assert loader.local_path is None
-
-
-# --- Cached access ---
-
-
-def test_init_and_get_settings(global_dir: Path, tmp_path: Path) -> None:
-    reset_settings()
-    result = init_settings(cwd=tmp_path, justx_home=global_dir)
-    assert result.discovery.recursive is True
-    assert get_settings() is result
-
-
-def test_get_settings_lazy_loads(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    reset_settings()
-    monkeypatch.setenv("JUSTX_HOME", str(tmp_path / "empty"))
-    monkeypatch.chdir(tmp_path)
-    settings = get_settings()
-    assert isinstance(settings, LocalSettings)
-
-
-def test_reset_clears_cache(global_dir: Path, tmp_path: Path) -> None:
-    reset_settings()
-    first = init_settings(cwd=tmp_path, justx_home=global_dir)
-    reset_settings()
-    second = init_settings(cwd=tmp_path, justx_home=tmp_path / "empty")
-    assert first is not second
-    assert second.discovery.recursive is False  # defaults, no config file

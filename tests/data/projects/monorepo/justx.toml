@@ -1,2 +1,2 @@
 [discovery]
-recursive = "True"
+recursive = true

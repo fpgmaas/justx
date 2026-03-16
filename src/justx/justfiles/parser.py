@@ -32,7 +32,7 @@ class JustfileParser:
         binary = self._require_just()
         data = self._dump(binary, path)
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
-        working_dir_mode = self._parse_working_dir_mode(path)
+        working_dir_mode = self._parse_working_dir_mode(path, scope)
         working_dir = self._resolve_working_dir(path, working_dir_mode)
         if display_name is None:
             display_name = path.stem.replace(".", "")
@@ -56,14 +56,21 @@ class JustfileParser:
             return parent.parent
         return parent
 
-    def _parse_working_dir_mode(self, path: Path) -> WorkingDirMode:
+    def _parse_working_dir_mode(self, path: Path, scope: Scope) -> WorkingDirMode:
         _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
 
         text = path.read_text()
-        m = _DIRECTIVE_RE.search(text)
-        if m and m.group(1) in ("project", "justfile"):
-            return WorkingDirMode.PROJECT
-        return WorkingDirMode.CWD
+        match = _DIRECTIVE_RE.search(text)
+        if match:
+            directive = match.group(1)
+            if directive == "cwd":
+                return WorkingDirMode.CWD
+            if directive in ("project", "justfile"):
+                return WorkingDirMode.PROJECT
+
+        if scope == Scope.GLOBAL:
+            return WorkingDirMode.CWD
+        return WorkingDirMode.PROJECT
 
     def _require_just(self) -> str:
         binary = shutil.which("just")

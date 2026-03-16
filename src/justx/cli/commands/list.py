@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import click
 
-from justx.config import get_settings
+from justx.config import load_settings
 from justx.justfiles.loader import JustxLoader
 
 
@@ -15,7 +15,7 @@ def list_cmd(use_global: bool, use_local: bool, source: str | None) -> None:
     if use_global and use_local:
         raise click.UsageError("Cannot use -g and -l together.")  # noqa: TRY003
 
-    settings = get_settings()
+    settings = load_settings()
     config = JustxLoader(config=settings.discovery).load()
 
     if use_global:

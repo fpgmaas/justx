@@ -2,7 +2,7 @@
 
 Local justfiles live alongside your project and are only loaded when justx is run from that directory (or a subdirectory). They are the right place for project-specific tasks: running tests, building artifacts, starting dev servers, deploying, and so on.
 
-By default, local recipes run relative to their **project root** — the directory containing the `justfile`, or the parent of `.justx/` for files inside it. This can be changed per file with a [directive](working-directory.md).
+By default, local recipes run relative to the **project root** — the directory containing the `justfile`, or the directory containing `.justx/` for recipe files inside it. This can be changed per file with a [directive](working-directory.md).
 
 ## File locations
 

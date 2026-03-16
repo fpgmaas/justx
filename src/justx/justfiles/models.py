@@ -130,6 +130,7 @@ class Source(BaseModel):
         scope_label = self.scope.value
         console.print(
             f"[bold]{escape(self.display_name)}[/bold]  [dim]\\[{scope_label}][/dim]  [dim]{escape(str(self.path))}[/dim]"
+            f"  [dim]workdir={escape(str(self.working_dir))}[/dim]"
         )
         for recipe in self.recipes:
             params = " ".join(p.name for p in recipe.parameters)

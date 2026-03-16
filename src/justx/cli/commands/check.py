@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.markup import escape
 
-from justx.config import SettingsLoader, get_settings
+from justx.config import SettingsLoader, load_settings
 from justx.justfiles.discovery import JustxDiscovery
 from justx.justfiles.loader import JustxLoader
 
@@ -19,7 +19,7 @@ def check_cmd(verbose: bool) -> None:
     console = Console()
     _check_just_binary(console)
 
-    settings = get_settings()
+    settings = load_settings()
     paths = JustxDiscovery(config=settings.discovery).discover()
 
     _print_summary(console, paths)
