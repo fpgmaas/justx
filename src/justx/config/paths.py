@@ -14,21 +14,6 @@ def get_justx_home() -> Path:
     return DEFAULT_JUSTX_HOME
 
 
-def resolve_global_config_path(justx_home: Path) -> Path | None:
-    """Return the global config path if it exists, else None."""
-    path = justx_home / "config.toml"
-    return path if path.is_file() else None
-
-
-def resolve_local_config_path(cwd: Path) -> Path | None:
-    """Find local config: justx.toml in cwd first, then .justx/config.toml."""
-    candidates = [
-        cwd / "justx.toml",
-        cwd / ".justx" / "config.toml",
-    ]
-    return next((p for p in candidates if p.is_file()), None)
-
-
 def get_global_justfile_candidates(justx_home: Path | None = None) -> list[Path]:
     """Return candidate paths for the global justfile, in just's search order.
 

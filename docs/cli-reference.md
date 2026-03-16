@@ -145,7 +145,7 @@ Verify that `just` is installed, show discovered justfile counts, and display co
 justx check [OPTIONS]
 ```
 
-Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location, a summary of discovered justfiles, and the paths to global and local configuration files.
+Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location, a summary of discovered justfiles, and the config file path (if present).
 
 ### Options
 
@@ -158,9 +158,7 @@ Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just
 ```
 just:      /usr/local/bin/just ✓
 justfiles: 3 global, 1 local
-config:
-  global: /Users/alice/.config/justx/config.toml
-  local:  (not found)
+config:    ./justx.toml
 ```
 
 ### Verbose output

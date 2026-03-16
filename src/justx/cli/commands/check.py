@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.markup import escape
 
-from justx.config import LocalSettings, SettingsLoader
+from justx.config import Settings, find_config_path, load_settings
 from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 from justx.justfiles.loader import JustxLoader
 
@@ -19,12 +19,11 @@ def check_cmd(verbose: bool) -> None:
     console = Console()
     _check_just_binary(console)
 
-    loader = SettingsLoader()
-    settings = loader.load()
+    settings = load_settings()
     paths = JustxDiscovery(config=settings.discovery).discover()
 
     _print_summary(console, paths)
-    _print_config_paths(console, loader)
+    _print_config_path(console)
 
     if not verbose:
         return
@@ -50,16 +49,12 @@ def _print_summary(console: Console, paths: DiscoveredPaths) -> None:
     console.print(f"[bold]justfiles:[/bold] {n_global} global, {n_local} local")
 
 
-def _print_config_paths(console: Console, loader: SettingsLoader) -> None:
-    console.print("[bold]config:[/bold]")
-    if loader.global_path:
-        console.print(f"  [dim]global:[/dim] [cyan]{escape(str(loader.global_path))}[/cyan]")
+def _print_config_path(console: Console) -> None:
+    config_path = find_config_path()
+    if config_path:
+        console.print(f"[bold]config:[/bold]    [cyan]{escape(str(config_path))}[/cyan]")
     else:
-        console.print("  [dim]global: (not found)[/dim]")
-    if loader.local_path:
-        console.print(f"  [dim]local:[/dim]  [cyan]{escape(str(loader.local_path))}[/cyan]")
-    else:
-        console.print("  [dim]local:  (not found)[/dim]")
+        console.print("[bold]config:[/bold]    [dim](not found)[/dim]")
 
 
 def _print_discovered_paths(console: Console, paths: DiscoveredPaths) -> None:
@@ -79,7 +74,7 @@ def _print_discovered_paths(console: Console, paths: DiscoveredPaths) -> None:
         console.print("  [dim](none)[/dim]")
 
 
-def _print_sources_and_recipes(console: Console, settings: LocalSettings) -> None:
+def _print_sources_and_recipes(console: Console, settings: Settings) -> None:
     config = JustxLoader(config=settings.discovery).load()
     all_sources = [*config.global_sources, *config.local_sources]
     if all_sources:
@@ -88,7 +83,7 @@ def _print_sources_and_recipes(console: Console, settings: LocalSettings) -> Non
             source.pretty_print(console)
 
 
-def _print_verbose_settings(console: Console, settings: LocalSettings) -> None:
+def _print_verbose_settings(console: Console, settings: Settings) -> None:
     console.print("[bold]Settings:[/bold]")
     data = settings.model_dump()
     _print_settings(console, data)

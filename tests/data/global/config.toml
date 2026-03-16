@@ -1,3 +1,0 @@
-[defaults.discovery]
-recursive = true
-max_depth = 5

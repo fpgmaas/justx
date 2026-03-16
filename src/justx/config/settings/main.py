@@ -5,7 +5,6 @@ from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
-from justx.config.paths import get_justx_home, resolve_global_config_path, resolve_local_config_path
 from justx.config.settings.discovery import DiscoveryConfig
 
 if sys.version_info >= (3, 11):
@@ -14,14 +13,9 @@ else:
     import tomli as tomllib
 
 
-class LocalSettings(BaseModel):
+class Settings(BaseModel):
     model_config = {"extra": "forbid"}
     discovery: DiscoveryConfig = DiscoveryConfig()
-
-
-class GlobalSettings(BaseModel):
-    model_config = {"extra": "forbid"}
-    defaults: LocalSettings = LocalSettings()
 
 
 class ConfigError(Exception):
@@ -33,67 +27,29 @@ class ConfigError(Exception):
         super().__init__(f"Error loading config from {path}: {cause}")
 
 
-class SettingsLoader:
-    """Loads and merges TOML config files into validated settings.
-
-    Global config uses [defaults.discovery] to set defaults for local projects.
-    Local config uses [discovery] directly.
-    """
-
-    def __init__(self, cwd: Path | None = None, justx_home: Path | None = None) -> None:
-        justx_home = justx_home or get_justx_home()
-        cwd = cwd or Path.cwd()
-        self.global_path = resolve_global_config_path(justx_home)
-        self.local_path = resolve_local_config_path(cwd)
-
-    def load(self) -> LocalSettings:
-        merged = LocalSettings().model_dump()
-
-        if self.global_path is not None:
-            global_data = self._load_file(self.global_path)
-            global_settings = self._validate_global(global_data, self.global_path)
-            self._deep_merge(merged, global_settings.defaults.model_dump(exclude_defaults=True))
-
-        if self.local_path is not None:
-            local_data = self._load_file(self.local_path)
-            self._validate_local(local_data, self.local_path)
-            self._deep_merge(merged, local_data)
-
-        return self._validate_local(merged)
-
-    @staticmethod
-    def _load_file(path: Path) -> dict:
-        """Load a TOML config file. Raises ConfigError on invalid TOML."""
-        try:
-            with open(path, "rb") as f:
-                return tomllib.load(f)
-        except tomllib.TOMLDecodeError as e:
-            raise ConfigError(path, e) from e
-
-    @staticmethod
-    def _deep_merge(base: dict, override: dict) -> None:
-        """Recursively merge override into base, mutating base in place."""
-        for key, value in override.items():
-            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
-                SettingsLoader._deep_merge(base[key], value)
-            else:
-                base[key] = value
-
-    @staticmethod
-    def _validate_global(data: dict, path: Path | None = None) -> GlobalSettings:
-        try:
-            return GlobalSettings.model_validate(data)
-        except ValidationError as e:
-            raise ConfigError(path or Path("<global>"), e) from e
-
-    @staticmethod
-    def _validate_local(data: dict, path: Path | None = None) -> LocalSettings:
-        try:
-            return LocalSettings.model_validate(data)
-        except ValidationError as e:
-            raise ConfigError(path or Path("<merged>"), e) from e
+def find_config_path(cwd: Path | None = None) -> Path | None:
+    """Find justx.toml in the given directory."""
+    resolved = cwd or Path.cwd()
+    path = resolved / "justx.toml"
+    return path if path.is_file() else None
 
 
-def load_settings(cwd: Path | None = None, justx_home: Path | None = None) -> LocalSettings:
-    """Load settings by layering: defaults -> global config -> local config."""
-    return SettingsLoader(cwd, justx_home).load()
+def load_settings(cwd: Path | None = None) -> Settings:
+    """Load settings from justx.toml if present, otherwise return defaults."""
+    config_path = find_config_path(cwd)
+    if config_path is None:
+        return Settings()
+    return _load_and_validate(config_path)
+
+
+def _load_and_validate(path: Path) -> Settings:
+    try:
+        with open(path, "rb") as file:
+            data = tomllib.load(file)
+    except tomllib.TOMLDecodeError as error:
+        raise ConfigError(path, error) from error
+
+    try:
+        return Settings.model_validate(data)
+    except ValidationError as error:
+        raise ConfigError(path, error) from error

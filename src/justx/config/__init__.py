@@ -2,9 +2,8 @@ from justx.config.paths import DEFAULT_JUSTX_HOME, get_global_justfile_candidate
 from justx.config.settings import (
     ConfigError,
     DiscoveryConfig,
-    GlobalSettings,
-    LocalSettings,
-    SettingsLoader,
+    Settings,
+    find_config_path,
     load_settings,
 )
 
@@ -12,9 +11,8 @@ __all__ = [
     "DEFAULT_JUSTX_HOME",
     "ConfigError",
     "DiscoveryConfig",
-    "GlobalSettings",
-    "LocalSettings",
-    "SettingsLoader",
+    "Settings",
+    "find_config_path",
     "get_global_justfile_candidates",
     "get_justx_home",
     "load_settings",
