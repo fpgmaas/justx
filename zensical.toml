@@ -19,7 +19,8 @@ nav = [
   {"Configuration" = [
     "configuration/global.md",
     "configuration/local.md",
-    "configuration/directives.md",
+    "configuration/config-file.md",
+    "configuration/working-directory.md",
   ]},
   {"CLI Reference" = "cli-reference.md"}
 ]

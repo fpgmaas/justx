@@ -2,6 +2,8 @@
 
 Global justfiles are available in every directory. They are the right place for personal utilities — git helpers, Docker shortcuts, SSH tools, and anything else you reach for regardless of which project you are in.
 
+By default, global recipes run in your **current working directory**, so they behave as if you typed the command yourself. This can be changed per file with a [directive](working-directory.md).
+
 ## Example layout
 
 ```
