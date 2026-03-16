@@ -14,9 +14,14 @@ else:
     import tomli as tomllib
 
 
-class JustxSettings(BaseModel):
+class LocalSettings(BaseModel):
     model_config = {"extra": "forbid"}
     discovery: DiscoveryConfig = DiscoveryConfig()
+
+
+class GlobalSettings(BaseModel):
+    model_config = {"extra": "forbid"}
+    defaults: LocalSettings = LocalSettings()
 
 
 class ConfigError(Exception):
@@ -29,7 +34,11 @@ class ConfigError(Exception):
 
 
 class SettingsLoader:
-    """Loads and merges TOML config files into validated settings."""
+    """Loads and merges TOML config files into validated settings.
+
+    Global config uses [defaults.discovery] to set defaults for local projects.
+    Local config uses [discovery] directly.
+    """
 
     def __init__(self, cwd: Path | None = None, justx_home: Path | None = None) -> None:
         justx_home = justx_home or get_justx_home()
@@ -37,12 +46,20 @@ class SettingsLoader:
         self.global_path = resolve_global_config_path(justx_home)
         self.local_path = resolve_local_config_path(cwd)
 
-    def load(self) -> JustxSettings:
-        merged = JustxSettings().model_dump()
-        for path in (self.global_path, self.local_path):
-            if path is not None:
-                self._deep_merge(merged, self._load_file(path))
-        return self._validate(merged)
+    def load(self) -> LocalSettings:
+        merged = LocalSettings().model_dump()
+
+        if self.global_path is not None:
+            global_data = self._load_file(self.global_path)
+            global_settings = self._validate_global(global_data, self.global_path)
+            self._deep_merge(merged, global_settings.defaults.model_dump(exclude_defaults=True))
+
+        if self.local_path is not None:
+            local_data = self._load_file(self.local_path)
+            self._validate_local(local_data, self.local_path)
+            self._deep_merge(merged, local_data)
+
+        return self._validate_local(merged)
 
     @staticmethod
     def _load_file(path: Path) -> dict:
@@ -63,31 +80,38 @@ class SettingsLoader:
                 base[key] = value
 
     @staticmethod
-    def _validate(data: dict) -> JustxSettings:
+    def _validate_global(data: dict, path: Path | None = None) -> GlobalSettings:
         try:
-            return JustxSettings.model_validate(data)
+            return GlobalSettings.model_validate(data)
         except ValidationError as e:
-            raise ConfigError(Path("<merged>"), e) from e
+            raise ConfigError(path or Path("<global>"), e) from e
+
+    @staticmethod
+    def _validate_local(data: dict, path: Path | None = None) -> LocalSettings:
+        try:
+            return LocalSettings.model_validate(data)
+        except ValidationError as e:
+            raise ConfigError(path or Path("<merged>"), e) from e
 
 
-def load_settings(cwd: Path | None = None, justx_home: Path | None = None) -> JustxSettings:
+def load_settings(cwd: Path | None = None, justx_home: Path | None = None) -> LocalSettings:
     """Load settings by layering: defaults -> global config -> local config."""
     return SettingsLoader(cwd, justx_home).load()
 
 
 # --- Cached access ---
 
-_settings: JustxSettings | None = None
+_settings: LocalSettings | None = None
 
 
-def init_settings(cwd: Path | None = None, justx_home: Path | None = None) -> JustxSettings:
+def init_settings(cwd: Path | None = None, justx_home: Path | None = None) -> LocalSettings:
     """Load and cache settings. Call once at CLI startup."""
     global _settings
     _settings = load_settings(cwd, justx_home)
     return _settings
 
 
-def get_settings() -> JustxSettings:
+def get_settings() -> LocalSettings:
     """Return cached settings, loading defaults if init wasn't called."""
     global _settings
     if _settings is None:

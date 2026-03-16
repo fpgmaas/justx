@@ -1,7 +1,8 @@
 from justx.config.settings.discovery import DiscoveryConfig
 from justx.config.settings.main import (
     ConfigError,
-    JustxSettings,
+    GlobalSettings,
+    LocalSettings,
     SettingsLoader,
     get_settings,
     init_settings,
@@ -12,7 +13,8 @@ from justx.config.settings.main import (
 __all__ = [
     "ConfigError",
     "DiscoveryConfig",
-    "JustxSettings",
+    "GlobalSettings",
+    "LocalSettings",
     "SettingsLoader",
     "get_settings",
     "init_settings",

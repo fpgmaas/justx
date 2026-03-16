@@ -7,7 +7,7 @@ import pytest
 from justx.config.settings.discovery import DEFAULT_EXCLUDE
 from justx.config.settings.main import (
     ConfigError,
-    JustxSettings,
+    LocalSettings,
     SettingsLoader,
     get_settings,
     init_settings,
@@ -79,6 +79,21 @@ def test_local_does_not_clobber_unset_global_fields(global_dir: Path, tmp_path: 
     assert settings.discovery.extend_exclude == ["vendor"]  # from local
 
 
+# --- Global config uses [defaults.discovery] ---
+
+
+def test_global_config_requires_defaults_namespace(tmp_path: Path) -> None:
+    _write_toml(tmp_path / "config.toml", "[defaults.discovery]\nrecursive = true\n")
+    settings = load_settings(cwd=tmp_path / "nowhere", justx_home=tmp_path)
+    assert settings.discovery.recursive is True
+
+
+def test_global_config_rejects_bare_discovery(tmp_path: Path) -> None:
+    _write_toml(tmp_path / "config.toml", "[discovery]\nrecursive = true\n")
+    with pytest.raises(ConfigError):
+        load_settings(cwd=tmp_path / "nowhere", justx_home=tmp_path)
+
+
 # --- Errors ---
 
 
@@ -90,7 +105,7 @@ def test_invalid_toml_raises_config_error(tmp_path: Path) -> None:
 
 
 def test_invalid_schema_raises_config_error(tmp_path: Path) -> None:
-    _write_toml(tmp_path / "config.toml", "[discovery]\nrecursive = 42\n")
+    _write_toml(tmp_path / "config.toml", "[defaults.discovery]\nrecursive = 42\n")
     with pytest.raises(ConfigError):
         load_settings(cwd=tmp_path / "nowhere", justx_home=tmp_path)
 
@@ -132,7 +147,7 @@ def test_get_settings_lazy_loads(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("JUSTX_HOME", str(tmp_path / "empty"))
     monkeypatch.chdir(tmp_path)
     settings = get_settings()
-    assert isinstance(settings, JustxSettings)
+    assert isinstance(settings, LocalSettings)
 
 
 def test_reset_clears_cache(global_dir: Path, tmp_path: Path) -> None:
