@@ -69,15 +69,14 @@ export JUSTX_HOME=/path/to/my/justx-home
 
 Use `justx init --download-examples` to get a starter set of files. See [Examples](https://github.com/fpgmaas/justx/tree/main/examples) for details.
 
-> **Note:** A bare `justfile` inside `~/.justx/` is **not** loaded. Use one of the global justfile locations below instead.
-
-
 ### Default global justfile
 
-justx also discovers a global justfile from the same locations as `just --global-justfile` ([docs](https://just.systems/man/en/global-and-user-justfiles.html#global-justfile)). The first path that exists wins:
+justx discovers a global justfile from the same locations as `just --global-justfile` ([docs](https://just.systems/man/en/global-and-user-justfiles.html#global-justfile)), with `~/.justx/justfile` as a final fallback. The first path that exists wins:
 
 1. `$XDG_CONFIG_HOME/just/justfile` (defaults to `~/.config/just/justfile`)
 2. `~/justfile`
 3. `~/.justfile`
+4. `~/.justx/justfile`
+5. `~/.justx/.justfile`
 
-This is optional — it is useful if you already have a global justfile for `just -g` and want those recipes to show up in justx as well.
+This is optional — it is useful if you already have a global justfile for `just -g` and want those recipes to show up in justx as well. If you don't use `just -g`, placing a `justfile` in `~/.justx/` is the simplest option.

@@ -44,15 +44,41 @@ def test_discover_empty(tmp_home, tmp_cwd, fake_user_home):
     assert result.local_paths == []
 
 
-def test_justx_home_justfile_is_ignored(tmp_home, tmp_cwd, fake_user_home):
-    """A bare 'justfile' inside ~/.justx should NOT be discovered."""
+def test_justx_home_justfile_is_discovered_as_fallback(tmp_home, tmp_cwd, fake_user_home):
+    """A bare 'justfile' inside ~/.justx is discovered as a global justfile fallback."""
     tmp_cwd.mkdir()
     _write_justfile(tmp_home / "justfile")
 
     result = JustxDiscovery().discover(cwd=tmp_cwd, justx_home=tmp_home)
 
-    assert result.global_paths == []
+    assert result.global_paths == [tmp_home / "justfile"]
     assert result.local_paths == []
+
+
+def test_justx_home_dot_justfile_is_discovered_as_fallback(tmp_home, tmp_cwd, fake_user_home):
+    """A '.justfile' inside ~/.justx is discovered as a global justfile fallback."""
+    tmp_cwd.mkdir()
+    _write_justfile(tmp_home / ".justfile")
+
+    result = JustxDiscovery().discover(cwd=tmp_cwd, justx_home=tmp_home)
+
+    assert result.global_paths == [tmp_home / ".justfile"]
+    assert result.local_paths == []
+
+
+def test_standard_global_justfile_takes_precedence_over_justx_home_fallback(tmp_home, fake_user_home):
+    """Standard global justfile locations win over justx_home/justfile."""
+    cwd = fake_user_home / "project"
+    cwd.mkdir()
+    standard_justfile = fake_user_home / ".config" / "just" / "justfile"
+    _write_justfile(standard_justfile)
+    _write_justfile(tmp_home / "justfile")
+
+    result = JustxDiscovery().discover(cwd=cwd, justx_home=tmp_home)
+
+    assert standard_justfile in result.global_paths
+    # justx_home/justfile should not appear — only the first candidate wins
+    assert tmp_home / "justfile" not in result.global_paths
 
 
 def test_discover_local_root_justfile(tmp_home, tmp_cwd, fake_user_home):

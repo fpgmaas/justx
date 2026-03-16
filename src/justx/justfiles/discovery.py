@@ -46,15 +46,16 @@ class JustxDiscovery:
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []
-        global_justfile = self._discover_default_global_justfile()
+        global_justfile = self._discover_default_global_justfile(home)
         if global_justfile is not None:
             paths.append(global_justfile)
-        paths.extend(self._scan_just_files(home))
+        scanned = self._scan_just_files(home)
+        paths.extend(path for path in scanned if path != global_justfile)
         return paths
 
-    def _discover_default_global_justfile(self) -> Path | None:
+    def _discover_default_global_justfile(self, justx_home: Path) -> Path | None:
         """Find the global justfile using just's search order."""
-        for candidate in get_global_justfile_candidates():
+        for candidate in get_global_justfile_candidates(justx_home):
             if candidate.is_file():
                 return candidate
         return None

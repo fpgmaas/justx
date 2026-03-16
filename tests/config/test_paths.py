@@ -28,11 +28,11 @@ def test_skip_global_justfile_returns_empty(monkeypatch: pytest.MonkeyPatch) -> 
     assert get_global_justfile_candidates() == []
 
 
-def test_global_justfile_candidates_returns_three(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_global_justfile_candidates_returns_five(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("JUSTX_SKIP_GLOBAL_JUSTFILE", raising=False)
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
     candidates = get_global_justfile_candidates()
-    assert len(candidates) == 3
+    assert len(candidates) == 5
     assert all(isinstance(c, Path) for c in candidates)
 
 
