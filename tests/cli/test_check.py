@@ -63,6 +63,6 @@ def test_check_verbose_lists_module_justfile_paths(project_with_modules: Path) -
     with run_within_dir(project_with_modules):
         result = runner.invoke(main, ["check", "-v"])
     assert result.exit_code == 0
-    assert "bar/justfile" in result.output
-    assert "bar/baz/justfile" in result.output
+    assert str(Path("bar") / "justfile") in result.output
+    assert str(Path("bar") / "baz" / "justfile") in result.output
     assert "groups.just" in result.output
