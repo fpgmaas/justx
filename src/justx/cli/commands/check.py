@@ -8,7 +8,8 @@ from rich.console import Console
 from rich.markup import escape
 
 from justx.config import SettingsLoader, load_settings
-from justx.justfiles.discovery import JustxDiscovery
+from justx.config.settings.main import LocalSettings
+from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 from justx.justfiles.loader import JustxLoader
 
 
@@ -43,7 +44,7 @@ def _check_just_binary(console: Console) -> None:
     console.print(f"[bold]just:[/bold]      [cyan]{escape(just_bin)}[/cyan] [green]✓[/green]")
 
 
-def _print_summary(console: Console, paths: object) -> None:
+def _print_summary(console: Console, paths: DiscoveredPaths) -> None:
     n_global = len(paths.global_paths)
     n_local = len(paths.local_paths)
     console.print(f"[bold]justfiles:[/bold] {n_global} global, {n_local} local")
@@ -62,7 +63,7 @@ def _print_config_paths(console: Console) -> None:
         console.print("  [dim]local:  (not found)[/dim]")
 
 
-def _print_discovered_paths(console: Console, paths: object) -> None:
+def _print_discovered_paths(console: Console, paths: DiscoveredPaths) -> None:
     console.print()
     console.print("[bold]Global justfiles:[/bold]")
     if paths.global_paths:
@@ -79,7 +80,7 @@ def _print_discovered_paths(console: Console, paths: object) -> None:
         console.print("  [dim](none)[/dim]")
 
 
-def _print_sources_and_recipes(console: Console, settings: object) -> None:
+def _print_sources_and_recipes(console: Console, settings: LocalSettings) -> None:
     config = JustxLoader(config=settings.discovery).load()
     all_sources = [*config.global_sources, *config.local_sources]
     if all_sources:
@@ -88,7 +89,7 @@ def _print_sources_and_recipes(console: Console, settings: object) -> None:
             source.pretty_print(console)
 
 
-def _print_verbose_settings(console: Console, settings: object) -> None:
+def _print_verbose_settings(console: Console, settings: LocalSettings) -> None:
     console.print("[bold]Settings:[/bold]")
     data = settings.model_dump()
     _print_settings(console, data)
