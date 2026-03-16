@@ -3,34 +3,25 @@ from __future__ import annotations
 from justx.justfiles.models import Source
 
 
-def parse_target(target: str) -> tuple[str | None, str]:
-    """Split a ``source:recipe`` target string into its components.
+def resolve_target(target: str, sources: list[Source]) -> tuple[Source | None, str]:
+    """Resolve a CLI target string to a source and recipe name.
 
-    When no colon is present the target is treated as a plain recipe on the root justfile.
-
-    Args:
-        target: A raw CLI argument such as ``"docker:build"`` or ``"build"``.
+    Uses just-native ``::`` syntax throughout: ``source::recipe`` or
+    ``module::submodule::recipe``.  The longest matching source prefix
+    determines the source; the remaining segment is the recipe.
     """
-    if ":" in target:
-        source_name, recipe = target.rsplit(":", 1)
-        return source_name, recipe
+    segments = target.split("::")
+    for i in range(len(segments) - 1, 0, -1):
+        source_name = "::".join(segments[:i])
+        source = _find_source_by_name(sources, source_name)
+        if source is not None:
+            recipe = "::".join(segments[i:])
+            return source, recipe
     return None, target
 
 
-def find_source(sources: list[Source], source_name: str | None) -> Source | None:
-    """Look up a source by name, or return the root justfile.
-
-    Sources are identified by their file name.  The root justfile has no
-    source name, so we match on the conventional ``justfile`` / ``Justfile``
-    filenames rather than requiring callers to know the exact casing.
-
-    Args:
-        sources: The list of sources to search (local or global).
-        source_name: The source name to match, or ``None`` to find the root justfile.
-    """
+def _find_source_by_name(sources: list[Source], name: str) -> Source | None:
     for source in sources:
-        if source_name is None and source.display_name in ("justfile", "Justfile"):
-            return source
-        if source_name is not None and source.display_name == source_name:
+        if source.display_name == name:
             return source
     return None
