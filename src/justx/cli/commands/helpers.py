@@ -12,7 +12,7 @@ def parse_target(target: str) -> tuple[str | None, str]:
         target: A raw CLI argument such as ``"docker:build"`` or ``"build"``.
     """
     if ":" in target:
-        source_name, recipe = target.split(":", 1)
+        source_name, recipe = target.rsplit(":", 1)
         return source_name, recipe
     return None, target
 

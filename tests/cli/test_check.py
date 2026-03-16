@@ -48,3 +48,21 @@ def test_check_verbose_shows_recipes(local_dir: Path, global_dir: Path) -> None:
         result = runner.invoke(main, ["check", "-v"])
     assert result.exit_code == 0
     assert "Sources & recipes" in result.output
+
+
+def test_check_counts_module_justfiles(project_with_modules: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(project_with_modules):
+        result = runner.invoke(main, ["check"])
+    assert result.exit_code == 0
+    assert "4 local" in result.output
+
+
+def test_check_verbose_lists_module_justfile_paths(project_with_modules: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(project_with_modules):
+        result = runner.invoke(main, ["check", "-v"])
+    assert result.exit_code == 0
+    assert "bar/justfile" in result.output
+    assert "bar/baz/justfile" in result.output
+    assert "groups.just" in result.output

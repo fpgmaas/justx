@@ -55,3 +55,17 @@ def test_run_global_source_not_found(tmp_path: Path) -> None:
         result = runner.invoke(main, ["run", "-g", "greet"], env={"JUSTX_HOME": str(tmp_path)})
     assert result.exit_code == 1
     assert "not found in global sources" in result.output
+
+
+def test_run_module_recipe(project_with_modules: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(project_with_modules):
+        result = runner.invoke(main, ["run", "-l", "foo:lint"])
+    assert result.exit_code == 0
+
+
+def test_run_nested_module_recipe(project_with_modules: Path) -> None:
+    runner = CliRunner()
+    with run_within_dir(project_with_modules):
+        result = runner.invoke(main, ["run", "-l", "foo::baz:lint-baz"])
+    assert result.exit_code == 0

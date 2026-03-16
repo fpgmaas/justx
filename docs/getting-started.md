@@ -45,6 +45,8 @@ navigate to the recipe you want to run, and press `Enter`. If the recipe has inp
 
 If you run `justx` from a directory that already contains a `justfile`, it will appear automatically in the Sources pane alongside your global recipes — no extra setup needed.
 
+Any [modules](https://just.systems/man/en/modules1.html) declared in your justfile are also discovered and shown as separate sources in the TUI.
+
 ## Verify your setup
 
 ```bash

@@ -96,6 +96,19 @@ You can also skip the TUI and run recipes directly with `justx run`:
 justx run -g docker:shell my-image
 ```
 
+## Local recipes and modules
+
+If you run `justx` from a directory that contains a `justfile`, its recipes appear automatically in the TUI. **justx** also supports `just`'s native [module system](https://just.systems/man/en/modules1.html) — any modules declared in your justfile are discovered and shown as separate sources.
+
+```just
+# justfile
+mod docker
+mod deploy
+
+test:
+    pytest
+```
+
 ---
 
-For full configuration details, file discovery behaviour, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).
+For full details on file discovery, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).

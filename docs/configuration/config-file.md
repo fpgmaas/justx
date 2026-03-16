@@ -1,50 +1,17 @@
-# Config File
+# Configuration
 
-justx works out of the box with zero configuration. For advanced use cases — such as [recursive file discovery in monorepos](local.md#recursive-discovery-monorepos) — you can create an optional `justx.toml` file in your project root.
+justx works out of the box with zero configuration.
 
-## File location
+## Global home directory
 
-Place a `justx.toml` file in the directory where you run `justx`:
+Override the directory that justx uses for global recipe files with the `JUSTX_HOME` environment variable:
 
-```
-my-project/
-├── justx.toml
-├── justfile
-└── ...
+```bash
+export JUSTX_HOME=/path/to/my/justx-home
 ```
 
-## Discovery options
+The default location is `~/.justx/`.
 
-All options live under the `[discovery]` section:
+## Local project setup
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `recursive` | `bool` | `false` | Enable recursive scanning of subdirectories for justfiles |
-| `max_depth` | `int` | `3` | Maximum directory depth to scan when `recursive` is enabled |
-| `exclude` | `list[str]` | see below | Directory names to skip during recursive scanning |
-| `extend_exclude` | `list[str]` | `[]` | Additional directory names to skip, merged with `exclude` |
-
-Default `exclude` list:
-
-```toml
-exclude = [
-    "node_modules",
-    ".venv",
-    "venv",
-    "target",
-    ".git",
-    "__pycache__",
-    ".tox",
-    "dist",
-    "build",
-]
-```
-
-## Example
-
-```toml
-[discovery]
-recursive = true
-max_depth = 2
-extend_exclude = ["vendor", "third_party"]
-```
+For local projects, justx relies on `just`'s native module system. Declare modules in your root `justfile` using `mod` — no additional configuration files are needed. See [Local Justfiles](local.md) for details.
