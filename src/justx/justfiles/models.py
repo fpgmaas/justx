@@ -23,11 +23,6 @@ class Scope(str, Enum):
     LOCAL = "local"
 
 
-class WorkingDirMode(str, Enum):
-    CWD = "cwd"
-    PROJECT = "project"
-
-
 class RecipeDefault(BaseModel):
     """The default value of a recipe parameter.
 
@@ -97,16 +92,16 @@ class Source(BaseModel):
         scope: Whether this is a global or local justfile.
         path: Absolute path to the justfile.
         recipes: Recipes defined in this justfile.
-        working_dir: Working directory for running recipes.
         module_path: Qualified module path (e.g. "docker" or "infra::deploy"), None for root sources.
+        root_justfile: Path to the root justfile (set on module sources so run() can invoke just correctly).
     """
 
     display_name: str
     scope: Scope
     path: Path
     recipes: list[Recipe]
-    working_dir: Path
     module_path: str | None = None
+    root_justfile: Path | None = None
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""
@@ -123,17 +118,32 @@ class Source(BaseModel):
         if just_bin is None:
             raise JustNotFoundError()
         result = subprocess.run(
-            [just_bin, "--justfile", str(self.path), "--working-directory", str(self.working_dir), recipe_name, *args],
+            self._build_command(just_bin, recipe_name, args),
             check=False,
         )
         return result.returncode
+
+    def _build_command(self, just_bin: str, recipe_name: str, args: Iterable[str]) -> list[str]:
+        """Build the just invocation command.
+
+        Global sources pass --working-directory so recipes run in the user's cwd.
+        Local sources let just handle working directories natively.
+        Module sources invoke just on the root justfile with a module::recipe target.
+        """
+        justfile = str(self.root_justfile or self.path)
+        target = f"{self.module_path}::{recipe_name}" if self.module_path else recipe_name
+
+        command = [just_bin, "--justfile", justfile]
+        if self.scope == Scope.GLOBAL:
+            command.extend(["--working-directory", str(Path.cwd())])
+        command.extend([target, *args])
+        return command
 
     def pretty_print(self, console: Console | None = None) -> None:
         console = console or Console()
         scope_label = self.scope.value
         console.print(
             f"[bold]{escape(self.display_name)}[/bold]  [dim]\\[{scope_label}][/dim]  [dim]{escape(str(self.path))}[/dim]"
-            f"  [dim]workdir={escape(str(self.working_dir))}[/dim]"
         )
         for recipe in self.recipes:
             params = " ".join(p.name for p in recipe.parameters)
