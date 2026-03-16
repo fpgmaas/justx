@@ -73,25 +73,20 @@ class JustxDiscovery:
     def _discover_local_recursive(self, cwd: Path) -> list[Path]:
         """Walk subdirectories of cwd up to max_depth, finding justfiles and .justx/ dirs."""
         paths: list[Path] = []
-        config = self._config
-        exclude = config.effective_exclude
+        exclude = self._config.effective_exclude
 
         for current_dir, dirnames, _filenames in os.walk(cwd):
             current = Path(current_dir)
             depth = len(current.relative_to(cwd).parts)
 
-            # Skip the root directory (handled by flat discovery)
-            if depth == 0:
-                # Filter dirnames in-place to control os.walk traversal
-                dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
-                continue
-
-            if depth > config.max_depth:
+            if depth > self._config.max_depth:
                 dirnames.clear()
                 continue
 
-            # Filter dirnames for further traversal
-            dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
+            self._exclude_directories(dirnames, exclude)
+
+            if depth == 0:
+                continue
 
             justfile = current / "justfile"
             if justfile.exists():
@@ -99,6 +94,10 @@ class JustxDiscovery:
             paths.extend(self._scan_just_files(current / ".justx"))
 
         return sorted(paths)
+
+    def _exclude_directories(self, dirnames: list[str], exclude: set[str]) -> None:
+        """Filter os.walk's dirnames in-place to prevent traversal into excluded directories."""
+        dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
 
     def _scan_just_files(self, directory: Path) -> list[Path]:
         if not directory.is_dir():

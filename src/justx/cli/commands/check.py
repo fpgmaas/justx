@@ -7,8 +7,7 @@ import click
 from rich.console import Console
 from rich.markup import escape
 
-from justx.config import SettingsLoader, load_settings
-from justx.config.settings.main import LocalSettings
+from justx.config import LocalSettings, SettingsLoader
 from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 from justx.justfiles.loader import JustxLoader
 
@@ -20,11 +19,12 @@ def check_cmd(verbose: bool) -> None:
     console = Console()
     _check_just_binary(console)
 
-    settings = load_settings()
+    loader = SettingsLoader()
+    settings = loader.load()
     paths = JustxDiscovery(config=settings.discovery).discover()
 
     _print_summary(console, paths)
-    _print_config_paths(console)
+    _print_config_paths(console, loader)
 
     if not verbose:
         return
@@ -50,8 +50,7 @@ def _print_summary(console: Console, paths: DiscoveredPaths) -> None:
     console.print(f"[bold]justfiles:[/bold] {n_global} global, {n_local} local")
 
 
-def _print_config_paths(console: Console) -> None:
-    loader = SettingsLoader()
+def _print_config_paths(console: Console, loader: SettingsLoader) -> None:
     console.print("[bold]config:[/bold]")
     if loader.global_path:
         console.print(f"  [dim]global:[/dim] [cyan]{escape(str(loader.global_path))}[/cyan]")

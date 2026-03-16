@@ -9,6 +9,8 @@ from pathlib import Path
 from justx.justfiles.exceptions import JustInvocationError, JustNotFoundError
 from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source, WorkingDirMode
 
+_DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
+
 
 class JustfileParser:
     """Parses justfiles into Source models by invoking just."""
@@ -57,8 +59,6 @@ class JustfileParser:
         return parent
 
     def _parse_working_dir_mode(self, path: Path, scope: Scope) -> WorkingDirMode:
-        _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
-
         text = path.read_text()
         match = _DIRECTIVE_RE.search(text)
         if match:
