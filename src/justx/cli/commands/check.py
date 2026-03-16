@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import shutil
 import sys
+from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.markup import escape
 
-from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 from justx.justfiles.loader import JustxLoader
+from justx.justfiles.models import JustxConfig, Source
 
 
 @click.command("check")
@@ -18,15 +19,15 @@ def check_cmd(verbose: bool) -> None:
     console = Console()
     _check_just_binary(console)
 
-    paths = JustxDiscovery().discover()
+    config = JustxLoader().load()
 
-    _print_summary(console, paths)
+    _print_summary(console, config)
 
     if not verbose:
         return
 
-    _print_discovered_paths(console, paths)
-    _print_sources_and_recipes(console)
+    _print_discovered_paths(console, config)
+    _print_sources_and_recipes(console, config)
 
 
 def _check_just_binary(console: Console) -> None:
@@ -39,31 +40,43 @@ def _check_just_binary(console: Console) -> None:
     console.print(f"[bold]just:[/bold]      [cyan]{escape(just_bin)}[/cyan] [green]✓[/green]")
 
 
-def _print_summary(console: Console, paths: DiscoveredPaths) -> None:
-    n_global = len(paths.global_paths)
-    n_local = len(paths.local_paths)
+def _unique_paths(sources: list[Source]) -> list[Path]:
+    seen: set[Path] = set()
+    paths: list[Path] = []
+    for source in sources:
+        if source.path not in seen:
+            seen.add(source.path)
+            paths.append(source.path)
+    return paths
+
+
+def _print_summary(console: Console, config: JustxConfig) -> None:
+    n_global = len(_unique_paths(config.global_sources))
+    n_local = len(_unique_paths(config.local_sources))
     console.print(f"[bold]justfiles:[/bold] {n_global} global, {n_local} local")
 
 
-def _print_discovered_paths(console: Console, paths: DiscoveredPaths) -> None:
+def _print_discovered_paths(console: Console, config: JustxConfig) -> None:
+    global_paths = _unique_paths(config.global_sources)
+    local_paths = _unique_paths(config.local_sources)
+
     console.print()
     console.print("[bold]Global justfiles:[/bold]")
-    if paths.global_paths:
-        for path in paths.global_paths:
+    if global_paths:
+        for path in global_paths:
             console.print(f"  [cyan]{escape(str(path))}[/cyan]")
     else:
         console.print("  [dim](none)[/dim]")
 
     console.print("\n[bold]Local justfiles:[/bold]")
-    if paths.local_paths:
-        for path in paths.local_paths:
+    if local_paths:
+        for path in local_paths:
             console.print(f"  [cyan]{escape(str(path))}[/cyan]")
     else:
         console.print("  [dim](none)[/dim]")
 
 
-def _print_sources_and_recipes(console: Console) -> None:
-    config = JustxLoader().load()
+def _print_sources_and_recipes(console: Console, config: JustxConfig) -> None:
     all_sources = [*config.global_sources, *config.local_sources]
     if all_sources:
         console.print("\n[bold]Sources & recipes:[/bold]")
