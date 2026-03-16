@@ -15,13 +15,20 @@ _DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
 class JustfileParser:
     """Parses justfiles into Source models by invoking just."""
 
-    def parse(self, path: Path, scope: Scope, display_name: str | None = None) -> Source:
-        """Parse a justfile and return a Source.
+    def parse(self, path: Path, scope: Scope, display_name: str | None = None) -> list[Source]:
+        """Parse a justfile and return sources for it and its modules.
+
+        Runs ``just --dump`` once on the root justfile. The root recipes become
+        one source; each module (recursively) becomes an additional source with
+        its module path as display name.
 
         Args:
             path: Absolute path to the justfile.
             scope: Whether this is a global or local justfile.
-            display_name: Display name override. If None, falls back to the file stem.
+            display_name: Display name override for the root source. If None, falls back to the file stem.
+
+        Returns:
+            A list of sources: root first, then flattened modules in depth-first order.
 
         Raises:
             FileNotFoundError: if the justfile does not exist.
@@ -33,13 +40,52 @@ class JustfileParser:
 
         binary = self._require_just()
         data = self._dump(binary, path)
+
+        root_source = self._build_root_source(data, path, scope, display_name)
+        module_sources = self._extract_modules(data.get("modules", {}), scope)
+
+        return [root_source, *module_sources]
+
+    def _build_root_source(self, data: dict, path: Path, scope: Scope, display_name: str | None) -> Source:
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
         working_dir_mode = self._parse_working_dir_mode(path, scope)
         working_dir = self._resolve_working_dir(path, working_dir_mode)
         if display_name is None:
             display_name = path.stem.replace(".", "")
+        return Source(
+            display_name=display_name,
+            scope=scope,
+            path=path,
+            recipes=recipes,
+            working_dir=working_dir,
+        )
 
-        return Source(display_name=display_name, scope=scope, path=path, recipes=recipes, working_dir=working_dir)
+    def _extract_modules(
+        self,
+        modules: dict,
+        scope: Scope,
+        parent_path: str = "",
+    ) -> list[Source]:
+        """Recursively flatten nested modules into a list of sources."""
+        sources = []
+        for name, module_data in modules.items():
+            module_path = f"{parent_path}::{name}" if parent_path else name
+            source = self._build_module_source(module_data, module_path, scope)
+            sources.append(source)
+            sources.extend(self._extract_modules(module_data.get("modules", {}), scope, module_path))
+        return sources
+
+    def _build_module_source(self, module_data: dict, module_path: str, scope: Scope) -> Source:
+        recipes = [self._parse_recipe(r) for r in module_data.get("recipes", {}).values()]
+        source_path = Path(module_data["source"])
+        return Source(
+            display_name=module_path,
+            scope=scope,
+            path=source_path,
+            recipes=recipes,
+            working_dir=source_path.parent,
+            module_path=module_path,
+        )
 
     @staticmethod
     def _resolve_working_dir(path: Path, mode: WorkingDirMode) -> Path:

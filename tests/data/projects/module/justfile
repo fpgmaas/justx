@@ -1,0 +1,9 @@
+mod foo 'bar/justfile'
+
+# Build the project
+build:
+    echo "Building project"
+
+# Run the project
+run:
+    echo "Running project"

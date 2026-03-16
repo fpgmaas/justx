@@ -97,6 +97,8 @@ class Source(BaseModel):
         scope: Whether this is a global or local justfile.
         path: Absolute path to the justfile.
         recipes: Recipes defined in this justfile.
+        working_dir: Working directory for running recipes.
+        module_path: Qualified module path (e.g. "docker" or "infra::deploy"), None for root sources.
     """
 
     display_name: str
@@ -104,6 +106,7 @@ class Source(BaseModel):
     path: Path
     recipes: list[Recipe]
     working_dir: Path
+    module_path: str | None = None
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""

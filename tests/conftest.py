@@ -35,3 +35,8 @@ def global_dir() -> Path:
 @pytest.fixture
 def monorepo_dir() -> Path:
     return PROJECTS_DIR / "monorepo"
+
+
+@pytest.fixture
+def module_justfile() -> Path:
+    return PROJECTS_DIR / "module" / "justfile"

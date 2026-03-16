@@ -30,7 +30,10 @@ class JustxLoader:
         )
 
     def _parse_all(self, paths: list[Path], scope: Scope, cwd: Path | None = None) -> list[Source]:
-        return [self._parser.parse(path, scope, display_name=self._source_name(path, scope, cwd)) for path in paths]
+        sources = []
+        for path in paths:
+            sources.extend(self._parser.parse(path, scope, display_name=self._source_name(path, scope, cwd)))
+        return sources
 
     @staticmethod
     def _source_name(path: Path, scope: Scope, cwd: Path | None) -> str | None:
