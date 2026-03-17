@@ -54,6 +54,7 @@ jobs:
 
   deploy-docs:
     needs: publish
+    if: ${{ !github.event.release.prerelease && !contains(github.event.release.tag_name, 'a') && !contains(github.event.release.tag_name, 'rc') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
