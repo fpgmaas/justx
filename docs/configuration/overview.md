@@ -1,6 +1,6 @@
 # Configuration
 
-justx works out of the box with zero configuration.
+justx works out of the box with zero configuration. Under the hood, justx delegates recipe execution to `just`, so any `just` configuration — such as recipe attributes, settings, and environment variables — applies as-is.
 
 ## Global home directory
 
