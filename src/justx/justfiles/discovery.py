@@ -51,9 +51,10 @@ class JustxDiscovery:
         return None
 
     def _discover_local(self, cwd: Path) -> list[Path]:
-        root = cwd / "justfile"
-        if root.exists():
-            return [root]
+        for name in ("justfile", "Justfile"):
+            path = cwd / name
+            if path.exists():
+                return [path]
         return []
 
     def _scan_just_files(self, directory: Path) -> list[Path]:

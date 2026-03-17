@@ -89,6 +89,17 @@ def test_discover_local_root_justfile(tmp_home, tmp_cwd, fake_user_home):
     assert result.local_paths == [tmp_cwd / "justfile"]
 
 
+def test_discover_local_capital_justfile(tmp_home, tmp_cwd, fake_user_home):
+    tmp_cwd.mkdir()
+    _write_justfile(tmp_cwd / "Justfile")
+
+    result = JustxDiscovery().discover(cwd=tmp_cwd, justx_home=tmp_home)
+
+    assert len(result.local_paths) == 1
+    # On case-insensitive filesystems (macOS), the lowercase check matches first
+    assert result.local_paths[0].name.lower() == "justfile"
+
+
 def test_discover_global_just_files(tmp_home, tmp_cwd, fake_user_home):
     tmp_cwd.mkdir()
     _write_justfile(tmp_home / "ops.just")
