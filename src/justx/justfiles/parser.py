@@ -99,13 +99,17 @@ class JustfileParser:
     def _parse_recipe(self, raw: dict) -> Recipe:
         parameters = [self._parse_parameter(p) for p in raw.get("parameters", [])]
         dependencies = [dep["recipe"] for dep in raw.get("dependencies", [])]
-        groups = [attr["group"] for attr in raw.get("attributes", []) if "group" in attr]
+        raw_attributes = raw.get("attributes", [])
+        groups = [attr["group"] for attr in raw_attributes if isinstance(attr, dict) and "group" in attr]
+        attributes = [attr for attr in raw_attributes if isinstance(attr, str)]
         return Recipe(
             name=raw["name"],
             doc=raw.get("doc"),
             parameters=parameters,
             dependencies=dependencies,
             groups=groups,
+            quiet=raw.get("quiet", False),
+            attributes=attributes,
         )
 
     def _parse_parameter(self, raw: dict) -> Parameter:
