@@ -14,7 +14,6 @@ def _source(
     root_justfile: Path | None = None,
 ) -> Source:
     return Source(
-        display_name=module_path or "justfile",
         scope=scope,
         path=path,
         recipes=[],

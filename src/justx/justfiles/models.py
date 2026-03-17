@@ -88,7 +88,6 @@ class Source(BaseModel):
     """A justfile source (global or local).
 
     Attributes:
-        display_name: Display name for the source.
         scope: Whether this is a global or local justfile.
         path: Absolute path to the justfile.
         recipes: Recipes defined in this justfile.
@@ -96,12 +95,16 @@ class Source(BaseModel):
         root_justfile: Path to the root justfile (set on module sources so run() can invoke just correctly).
     """
 
-    display_name: str
     scope: Scope
     path: Path
     recipes: list[Recipe]
     module_path: str | None = None
     root_justfile: Path | None = None
+
+    @property
+    def display_name(self) -> str:
+        """Derive a display name from the module path or file stem."""
+        return self.module_path or self.path.stem
 
     def filter_recipes(self, query: str = "") -> list[Recipe]:
         """Return visible recipes matching query (case-insensitive substring on name, doc, groups, source name)."""

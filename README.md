@@ -72,7 +72,6 @@ Split them into topic-focused files if you like:
 
 ```
 ~/.justx/
-├── justfile        # everyday catch-all recipes
 ├── git.just        # git workflows
 ├── docker.just     # container management
 └── ssh.just        # remote connections

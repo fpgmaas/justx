@@ -103,7 +103,7 @@ justx run (-g | -l) TARGET [ARGS]...
 
 | Argument | Description |
 |----------|-------------|
-| `TARGET` | Recipe to run. Use `source:recipe` to target a named source (file or module), or `recipe` alone to target the root `justfile`. |
+| `TARGET` | Recipe to run. Use `source::recipe` to target a named source (file or module), or `module::submodule::recipe` for nested modules. |
 | `ARGS` | Optional extra arguments passed through to `just`. |
 
 ### Options
@@ -124,7 +124,7 @@ justx run -g greet Alice
 
 # Run 'shell' from the global 'docker' source with `my-image` as the tag
 # Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
-justx run -g docker:shell my-image
+justx run -g docker::shell my-image
 
 # Run the local 'test' recipe with extra pytest flags
 # Equivalent to: just test -x -v
@@ -132,7 +132,7 @@ justx run -l test -x -v
 
 # Run 'staging' from the local 'deploy' module
 # Equivalent to: just deploy::staging
-justx run -l deploy:staging
+justx run -l deploy::staging
 ```
 
 ---

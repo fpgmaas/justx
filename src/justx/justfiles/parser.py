@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from collections.abc import Iterator
 from pathlib import Path
 
 from justx.justfiles.exceptions import JustInvocationError, JustNotFoundError
@@ -12,7 +13,7 @@ from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefau
 class JustfileParser:
     """Parses justfiles into Source models by invoking just."""
 
-    def parse(self, path: Path, scope: Scope, display_name: str | None = None) -> list[Source]:
+    def parse(self, path: Path, scope: Scope) -> list[Source]:
         """Parse a justfile and return sources for it and its modules.
 
         Runs ``just --dump`` once on the root justfile. The root recipes become
@@ -22,7 +23,6 @@ class JustfileParser:
         Args:
             path: Absolute path to the justfile.
             scope: Whether this is a global or local justfile.
-            display_name: Display name override for the root source. If None, falls back to the file stem.
 
         Returns:
             A list of sources: root first, then flattened modules in depth-first order.
@@ -38,17 +38,14 @@ class JustfileParser:
         binary = self._require_just()
         data = self._dump(binary, path)
 
-        root_source = self._build_root_source(data, path, scope, display_name)
-        module_sources = self._extract_modules(data.get("modules", {}), scope, root_justfile=path)
+        root_source = self._build_root_source(data, path, scope)
+        module_sources = list(self._extract_modules(data.get("modules", {}), scope, root_justfile=path))
 
         return [root_source, *module_sources]
 
-    def _build_root_source(self, data: dict, path: Path, scope: Scope, display_name: str | None) -> Source:
+    def _build_root_source(self, data: dict, path: Path, scope: Scope) -> Source:
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
-        if display_name is None:
-            display_name = path.stem.replace(".", "")
         return Source(
-            display_name=display_name,
             scope=scope,
             path=path,
             recipes=recipes,
@@ -61,25 +58,21 @@ class JustfileParser:
         *,
         root_justfile: Path,
         parent_path: str = "",
-    ) -> list[Source]:
-        """Recursively flatten nested modules into a list of sources."""
-        sources = []
+    ) -> Iterator[Source]:
+        """Recursively yield nested modules as sources in depth-first order."""
         for name, module_data in modules.items():
             module_path = f"{parent_path}::{name}" if parent_path else name
-            source = self._build_module_source(module_data, module_path, scope, root_justfile)
-            sources.append(source)
-            sources.extend(
-                self._extract_modules(
-                    module_data.get("modules", {}), scope, root_justfile=root_justfile, parent_path=module_path
+            yield self._build_module_source(module_data, module_path, scope, root_justfile)
+            nested_modules = module_data.get("modules", {})
+            if nested_modules:
+                yield from self._extract_modules(
+                    nested_modules, scope, root_justfile=root_justfile, parent_path=module_path
                 )
-            )
-        return sources
 
     def _build_module_source(self, module_data: dict, module_path: str, scope: Scope, root_justfile: Path) -> Source:
         recipes = [self._parse_recipe(r) for r in module_data.get("recipes", {}).values()]
         source_path = Path(module_data["source"])
         return Source(
-            display_name=module_path,
             scope=scope,
             path=source_path,
             recipes=recipes,
@@ -117,16 +110,15 @@ class JustfileParser:
 
     def _parse_parameter(self, raw: dict) -> Parameter:
         raw_default = raw.get("default")
-        if raw_default is None:
-            default = None
-            has_default = False
-        else:
-            default = RecipeDefault(
+        default = (
+            None
+            if raw_default is None
+            else RecipeDefault(
                 value=raw_default,
                 expression=not isinstance(raw_default, str),
             )
-            has_default = True
-        kind = self._parameter_kind(raw["kind"], has_default)
+        )
+        kind = self._parameter_kind(raw["kind"], has_default=default is not None)
         return Parameter(name=raw["name"], default=default, kind=kind)
 
     @staticmethod
