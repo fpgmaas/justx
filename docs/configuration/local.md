@@ -40,7 +40,8 @@ my-project/
 ├── justfile              # root — declares modules and top-level recipes
 ├── docker.just           # module: mod docker
 ├── deploy/
-│   └── justfile          # module: mod deploy
+│   ├── justfile          # module: mod deploy
+│   └── staging.just      # submodule: mod staging (inside deploy)
 ├── src/
 └── tests/
 ```
@@ -56,22 +57,46 @@ test *args:
 
 Each module appears as a separate source in the TUI. Nested modules (modules within modules) are flattened with `parent::child` display names.
 
-| Module declaration | Display name |
-|---|---|
-| `mod docker` | `docker` |
-| `mod deploy` (which itself declares `mod staging`) | `deploy`, `deploy::staging` |
+The above example could look as follows in the TUI:
+
+<div style="background: #1e1e2e; color: #cdd6f4; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5; border-radius: 8px; overflow: hidden; margin: 1em 0;">
+  <div style="background: #181825; padding: 6px 12px; color: #6c7086; text-align: center; font-size: 12px; border-bottom: 1px solid #313244;">
+    justx
+  </div>
+  <div style="display: flex; padding: 0; min-height: 260px;">
+    <div style="width: 35%; border-right: 1px solid #1e90ff; padding: 8px 0;">
+      <div style="color: #fab387; font-weight: bold; padding: 2px 10px;">Local</div>
+      <div style="padding: 2px 10px 2px 20px;">justfile</div>
+      <div style="background: #1e90ff; color: #1e1e2e; padding: 2px 10px 2px 20px; font-weight: bold;">docker</div>
+      <div style="padding: 2px 10px 2px 20px;">deploy</div>
+      <div style="padding: 2px 10px 2px 20px;">deploy::staging</div>
+    </div>
+    <div style="width: 65%; padding: 8px 12px;">
+      <div><span style="color: #a6e3a1; font-weight: bold;">build</span> <span style="color: #6c7086;">&lt;tag&gt;</span></div>
+      <div style="color: #6c7086; padding-left: 16px;">Build the Docker image</div>
+      <div><span style="color: #a6e3a1; font-weight: bold;">push</span> <span style="color: #6c7086;">&lt;tag&gt;</span></div>
+      <div style="color: #6c7086; padding-left: 16px;">Push image to registry</div>
+      <div><span style="color: #a6e3a1; font-weight: bold;">up</span></div>
+      <div style="color: #6c7086; padding-left: 16px;">Start containers</div>
+      <div><span style="color: #a6e3a1; font-weight: bold;">down</span></div>
+      <div style="color: #6c7086; padding-left: 16px;">Stop containers</div>
+    </div>
+  </div>
+  <div style="background: #181825; padding: 4px 12px; color: #6c7086; font-size: 11px; border-top: 1px solid #313244;">
+    <span style="color: #f9e2af;">q</span> Quit&nbsp;&nbsp;&nbsp;<span style="color: #f9e2af;">s</span> Search&nbsp;&nbsp;&nbsp;<span style="color: #f9e2af;">d</span> Details&nbsp;&nbsp;&nbsp;<span style="color: #f9e2af;">enter</span> Run
+  </div>
+</div>
 
 ### Running module recipes
 
-In the TUI, select the module source and pick a recipe. From the CLI:
+In the TUI, select the module source and pick a recipe. It's also technically possible to run local recipes through the `justx` CLI:
 
 ```bash
 # Run 'build' from the 'docker' module
 justx run -l docker::build
-
-# Run 'up' from the nested 'deploy::staging' module
-justx run -l "deploy::staging::up"
 ```
+
+but it's probably easier to simply run `just docker::build` 🤷
 
 ## Working directory
 
