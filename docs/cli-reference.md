@@ -8,7 +8,7 @@ Launch the interactive TUI.
 justx
 ```
 
-Discovers all global (`~/.justx/` or `$JUSTX_HOME`) and local (`./`) justfiles, then opens the TUI.
+Discovers all global (`~/.justx/` or `$JUSTX_HOME`) and local (`./`) justfiles — including `just` modules — then opens the TUI.
 
 ### Options
 
@@ -103,7 +103,7 @@ justx run (-g | -l) TARGET [ARGS]...
 
 | Argument | Description |
 |----------|-------------|
-| `TARGET` | Recipe to run. Use `source:recipe` to target a named justfile source, or `recipe` alone to target the root `justfile`. |
+| `TARGET` | Recipe to run. Use `source::recipe` to target a named source (file or module), or `module::submodule::recipe` for nested modules. |
 | `ARGS` | Optional extra arguments passed through to `just`. |
 
 ### Options
@@ -124,41 +124,40 @@ justx run -g greet Alice
 
 # Run 'shell' from the global 'docker' source with `my-image` as the tag
 # Equivalent to: just --justfile ~/.justx/docker.just --working-directory . shell my-image
-justx run -g docker:shell my-image
+justx run -g docker::shell my-image
 
 # Run the local 'test' recipe with extra pytest flags
 # Equivalent to: just test -x -v
 justx run -l test -x -v
 
-# Run 'staging' from the local 'deploy' source
-# Equivalent to: just --justfile .justx/deploy.just --working-directory . staging
-justx run -l deploy:staging
+# Run 'staging' from the local 'deploy' module
+# Equivalent to: just deploy::staging
+justx run -l deploy::staging
 ```
 
 ---
 
 ## `justx check`
 
-Verify that `just` is installed, show discovered justfile counts, and display configuration file locations.
+Verify that `just` is installed and show discovered justfile counts.
 
 ```
 justx check [OPTIONS]
 ```
 
-Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location, a summary of discovered justfiles, and the config file path (if present).
+Exits with code `1` if `just` is not found on `PATH`. Otherwise prints the `just` binary location and a summary of discovered justfiles.
 
 ### Options
 
 | Option | Description |
 |--------|-------------|
-| `-v`, `--verbose` | Show detailed discovery paths, sources with recipes, and full settings |
+| `-v`, `--verbose` | Show detailed discovery paths and sources with recipes |
 
 ### Default output
 
 ```
 just:      /usr/local/bin/just ✓
 justfiles: 3 global, 1 local
-config:    ./justx.toml
 ```
 
 ### Verbose output
@@ -166,6 +165,5 @@ config:    ./justx.toml
 With `-v`, the command additionally shows:
 
 - **Global justfiles** — full paths to each discovered global justfile
-- **Local justfiles** — full paths to each discovered local justfile
+- **Local justfiles** — full paths to each discovered local justfile (including module source files)
 - **Sources & recipes** — all loaded sources with their recipes
-- **Settings** — the fully resolved settings

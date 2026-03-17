@@ -11,15 +11,15 @@ A TUI command launcher built on top of <a href = "https://github.com/casey/just"
 
 ![justx TUI demo](https://raw.githubusercontent.com/fpgmaas/justx/assets/demo.gif)
 
-Store your frequently used commands as `just` recipes in `~/.justx/`, then run them from any directory through an interactive terminal UI by simply running `justx`. No memorising command names or flags; just pick a recipe and go.
+Store your frequently used commands as `just` recipes in `~/.justx/`, then run them from any directory through an interactive terminal UI by simply running `justx`. For local projects, justx uses `just`'s native module system to discover and organise recipes. No memorising command names or flags; just pick a recipe and go.
 
 ## Features
 
 - **TUI launcher** — browse and run recipes interactively with a keyboard-driven interface
 - **Global & local scopes** — maintain a personal recipe library in `~/.justx/` alongside per-project justfiles
+- **Module support** — automatically discovers `just` modules and shows them as separate sources
 - **Non-interactive mode** — `justx run` for scripting and CI pipelines
-- **Monorepo support** — recursively discover justfiles across sub-projects
-- **Zero config** — works with your existing justfiles.
+- **Zero config** — works with your existing justfiles
 
 ## Non-interactive usage
 

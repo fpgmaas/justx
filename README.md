@@ -68,25 +68,22 @@ Browse your recipes with the arrow keys and press `Enter` to run one. Press `q` 
 
 **justx** supports global recipes; recipes that are available from anywhere on your machine, no matter which project you're in.
 
-Split them into topic-focused files if you like:
+Global recipes are discovered automatically when you run `justx`. justx searches for the [global justfile](https://just.systems/man/en/global-and-user-justfiles.html#global-justfile) and also discovers all `.just` files in the `~/.justx/` directory. For example:
 
 ```
 ~/.justx/
-├── justfile        # everyday catch-all recipes
 ├── git.just        # git workflows
 ├── docker.just     # container management
 └── ssh.just        # remote connections
 ```
 
-For example, `~/.justx/docker.just` might contain:
+Where `~/.justx/docker.just` might contain:
 
 ```just
 # Run a container interactively with a shell
 shell image_tag:
     docker run --rm -it --entrypoint bash {{image_tag}}
 ```
-
-**justx** discovers these automatically and makes them available everywhere on your system by running `justx` in your terminal.
 
 You can also skip the TUI and run recipes directly with `justx run`:
 
@@ -96,6 +93,19 @@ You can also skip the TUI and run recipes directly with `justx run`:
 justx run -g docker:shell my-image
 ```
 
+## Local recipes and modules
+
+If you run `justx` from a directory that contains a `justfile`, its recipes appear automatically in the TUI. **justx** also supports `just`'s native [module system](https://just.systems/man/en/modules1.html) — any modules declared in your justfile are discovered and shown as separate sources.
+
+```just
+# justfile
+mod docker
+mod deploy
+
+test:
+    pytest
+```
+
 ---
 
-For full configuration details, file discovery behaviour, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).
+For full details on file discovery, CLI reference, and example justfiles, see the [documentation](https://fpgmaas.github.io/justx/).

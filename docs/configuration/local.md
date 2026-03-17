@@ -1,29 +1,14 @@
 # Local Justfiles
 
-Local justfiles live alongside your project and are only loaded when justx is run from that directory (or a subdirectory). They are the right place for project-specific tasks: running tests, building artifacts, starting dev servers, deploying, and so on.
+Local justfiles live alongside your project and are only loaded when justx is run from that directory. They are the right place for project-specific tasks: running tests, building artifacts, starting dev servers, deploying, and so on.
 
-By default, local recipes run relative to the **project root** — the directory containing the `justfile`, or the directory containing `.justx/` for recipe files inside it. This can be changed per file with a [directive](working-directory.md).
+## File discovery
 
-## File locations
+justx looks for a `justfile` (or `Justfile`) in the current working directory. All recipes and modules declared in that file are automatically discovered and shown in the TUI.
 
-| File pattern | Description |
-|---|---|
-| `./justfile` or `./Justfile` | Root justfile. |
-| `./.justx/*.just` | Additional recipe sources (one topic per file). |
+## Example
 
-## Example layout for a Python project
-
-```
-my-project/
-├── justfile              # top-level project tasks
-├── .justx/
-│   ├── docker.just       # container tasks for this project
-│   └── deploy.just       # deployment recipes
-├── src/
-└── tests/
-```
-
-A typical `justfile` at the project root:
+A typical project justfile:
 
 ```just
 # Run the test suite
@@ -35,57 +20,59 @@ lint:
     uv run ruff format .
     uv run ruff check --fix .
 
-# Build the package
-build:
-    uv build
+# Start dev server
+dev:
+    uv run uvicorn app:main --reload
 ```
 
-Additional sources in `.justx/` follow the same naming convention as global files — the file stem becomes the source name shown in the TUI.
+## Organising with modules
 
-## Recursive discovery
+As your justfile grows, you can split recipes into separate files using `just`'s native [module system](https://just.systems/man/en/modules1190.html). Declare a module in your root justfile with `mod`, and `just` looks for the source file in this order:
 
-By default, justx only looks for justfiles in the current directory. For monorepos and multi-project repositories, you can enable **recursive discovery** so that justx walks subdirectories to find additional justfiles and `.justx/` recipe directories.
+- `<name>.just`
+- `<name>/mod.just`
+- `<name>/justfile` (any capitalisation)
 
-Recursive discovery is enabled by setting `recursive = true` in a [config file](config-file.md). See the [config file reference](config-file.md) for all available options such as depth limits and exclusion patterns.
+For example:
 
-Each discovered file runs relative to its own (sub)project root, just like root-level local files. For example, recipes in `services/api/.justx/deploy.just` run in `services/api/` by default.
+```
+my-project/
+├── justfile              # root — declares modules and top-level recipes
+├── docker.just           # module: mod docker
+├── deploy/
+│   └── justfile          # module: mod deploy
+├── src/
+└── tests/
+```
 
-### What gets scanned
+```just
+mod docker
+mod deploy
 
-When recursive discovery is enabled, justx walks subdirectories of the current working directory (up to `max_depth` levels deep) looking for:
+# Run the test suite
+test *args:
+    uv run pytest {{args}}
+```
 
-- A `justfile` in the directory root
-- `*.just` and `*.justfile` files inside a `.justx/` subdirectory
+Each module appears as a separate source in the TUI. Nested modules (modules within modules) are flattened with `parent::child` display names.
 
-Directories listed in `exclude` or `extend_exclude` are skipped entirely, along with `.justx/` directories (which are scanned for recipe files, not traversed further).
-
-### Display names
-
-Discovered files appear in the TUI alongside your root-level sources, with display names derived from their relative path. The `.justx/` segment and `.just`/`.justfile` extensions are stripped. For example:
-
-| File path | Display name |
+| Module declaration | Display name |
 |---|---|
-| `services/api/justfile` | `services/api/justfile` |
-| `services/api/.justx/docker.just` | `services/api/docker` |
-| `libs/core/.justx/test.just` | `libs/core/test` |
+| `mod docker` | `docker` |
+| `mod deploy` (which itself declares `mod staging`) | `deploy`, `deploy::staging` |
 
-### Example monorepo layout
+### Running module recipes
 
+In the TUI, select the module source and pick a recipe. From the CLI:
+
+```bash
+# Run 'build' from the 'docker' module
+justx run -l docker::build
+
+# Run 'up' from the nested 'deploy::staging' module
+justx run -l "deploy::staging::up"
 ```
-my-monorepo/
-├── justx.toml                  # recursive = true
-├── justfile                    # top-level tasks
-├── .justx/
-│   └── ci.just                 # CI recipes
-├── services/
-│   ├── api/
-│   │   ├── justfile            # API service tasks
-│   │   └── .justx/
-│   │       └── docker.just     # API Docker recipes
-│   └── web/
-│       └── justfile            # Web service tasks
-└── libs/
-    └── core/
-        └── .justx/
-            └── test.just       # Library test recipes
-```
+
+## Working directory
+
+For local sources, `just` handles working directories natively — module recipes run in the directory containing their source file by default. Use `just`'s own [`[no-cd]` attribute](https://just.systems/man/en/attributes.html) if you need a recipe to run in the caller's directory instead.

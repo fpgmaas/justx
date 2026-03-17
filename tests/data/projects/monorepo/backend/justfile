@@ -1,3 +1,0 @@
-# Backend justfile
-build:
-    echo "building backend"

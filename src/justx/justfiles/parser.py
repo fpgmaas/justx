@@ -1,27 +1,31 @@
 from __future__ import annotations
 
 import json
-import re
 import shutil
 import subprocess
+from collections.abc import Iterator
 from pathlib import Path
 
 from justx.justfiles.exceptions import JustInvocationError, JustNotFoundError
-from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source, WorkingDirMode
-
-_DIRECTIVE_RE = re.compile(r"#\s*justx:\s*working-directory\s*=\s*(\S+)")
+from justx.justfiles.models import Parameter, ParameterKind, Recipe, RecipeDefault, Scope, Source
 
 
 class JustfileParser:
     """Parses justfiles into Source models by invoking just."""
 
-    def parse(self, path: Path, scope: Scope, display_name: str | None = None) -> Source:
-        """Parse a justfile and return a Source.
+    def parse(self, path: Path, scope: Scope) -> list[Source]:
+        """Parse a justfile and return sources for it and its modules.
+
+        Runs ``just --dump`` once on the root justfile. The root recipes become
+        one source; each module (recursively) becomes an additional source with
+        its module path as display name.
 
         Args:
             path: Absolute path to the justfile.
             scope: Whether this is a global or local justfile.
-            display_name: Display name override. If None, falls back to the file stem.
+
+        Returns:
+            A list of sources: root first, then flattened modules in depth-first order.
 
         Raises:
             FileNotFoundError: if the justfile does not exist.
@@ -33,44 +37,48 @@ class JustfileParser:
 
         binary = self._require_just()
         data = self._dump(binary, path)
+
+        root_source = self._build_root_source(data, path, scope)
+        module_sources = list(self._extract_modules(data.get("modules", {}), scope, root_justfile=path))
+
+        return [root_source, *module_sources]
+
+    def _build_root_source(self, data: dict, path: Path, scope: Scope) -> Source:
         recipes = [self._parse_recipe(r) for r in data.get("recipes", {}).values()]
-        working_dir_mode = self._parse_working_dir_mode(path, scope)
-        working_dir = self._resolve_working_dir(path, working_dir_mode)
-        if display_name is None:
-            display_name = path.stem.replace(".", "")
+        return Source(
+            scope=scope,
+            path=path,
+            recipes=recipes,
+        )
 
-        return Source(display_name=display_name, scope=scope, path=path, recipes=recipes, working_dir=working_dir)
+    def _extract_modules(
+        self,
+        modules: dict,
+        scope: Scope,
+        *,
+        root_justfile: Path,
+        parent_path: str = "",
+    ) -> Iterator[Source]:
+        """Recursively yield nested modules as sources in depth-first order."""
+        for name, module_data in modules.items():
+            module_path = f"{parent_path}::{name}" if parent_path else name
+            yield self._build_module_source(module_data, module_path, scope, root_justfile)
+            nested_modules = module_data.get("modules", {})
+            if nested_modules:
+                yield from self._extract_modules(
+                    nested_modules, scope, root_justfile=root_justfile, parent_path=module_path
+                )
 
-    @staticmethod
-    def _resolve_working_dir(path: Path, mode: WorkingDirMode) -> Path:
-        """Resolve the working directory for a justfile source.
-
-        For CWD mode, returns the current working directory.
-        For PROJECT mode, returns the project root:
-          - If the file is inside a .justx/ directory, returns .justx/../ (parent of .justx/)
-          - Otherwise, returns the justfile's parent directory.
-        """
-        if mode == WorkingDirMode.CWD:
-            return Path.cwd()
-        # PROJECT mode
-        parent = path.parent
-        if parent.name == ".justx":
-            return parent.parent
-        return parent
-
-    def _parse_working_dir_mode(self, path: Path, scope: Scope) -> WorkingDirMode:
-        text = path.read_text()
-        match = _DIRECTIVE_RE.search(text)
-        if match:
-            directive = match.group(1)
-            if directive == "cwd":
-                return WorkingDirMode.CWD
-            if directive in ("project", "justfile"):
-                return WorkingDirMode.PROJECT
-
-        if scope == Scope.GLOBAL:
-            return WorkingDirMode.CWD
-        return WorkingDirMode.PROJECT
+    def _build_module_source(self, module_data: dict, module_path: str, scope: Scope, root_justfile: Path) -> Source:
+        recipes = [self._parse_recipe(r) for r in module_data.get("recipes", {}).values()]
+        source_path = Path(module_data["source"])
+        return Source(
+            scope=scope,
+            path=source_path,
+            recipes=recipes,
+            module_path=module_path,
+            root_justfile=root_justfile,
+        )
 
     def _require_just(self) -> str:
         binary = shutil.which("just")
@@ -102,16 +110,15 @@ class JustfileParser:
 
     def _parse_parameter(self, raw: dict) -> Parameter:
         raw_default = raw.get("default")
-        if raw_default is None:
-            default = None
-            has_default = False
-        else:
-            default = RecipeDefault(
+        default = (
+            None
+            if raw_default is None
+            else RecipeDefault(
                 value=raw_default,
                 expression=not isinstance(raw_default, str),
             )
-            has_default = True
-        kind = self._parameter_kind(raw["kind"], has_default)
+        )
+        kind = self._parameter_kind(raw["kind"], has_default=default is not None)
         return Parameter(name=raw["name"], default=default, kind=kind)
 
     @staticmethod

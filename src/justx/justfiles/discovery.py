@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from justx.config import get_global_justfile_candidates, get_justx_home
-from justx.config.settings.discovery import DiscoveryConfig
 
 
 @dataclass
@@ -16,9 +14,6 @@ class DiscoveredPaths:
 
 class JustxDiscovery:
     """Discovers justfile paths in global and local scopes."""
-
-    def __init__(self, config: DiscoveryConfig | None = None) -> None:
-        self._config = config or DiscoveryConfig()
 
     def discover(
         self,
@@ -31,18 +26,13 @@ class JustxDiscovery:
             cwd: Local directory to scan. Defaults to the current working directory.
             justx_home: Global home directory. Defaults to $JUSTX_HOME or ~/.justx.
         """
-        home = self._resolve_home(justx_home)
+        home = justx_home or get_justx_home()
         resolved_cwd = cwd or Path.cwd()
 
         return DiscoveredPaths(
             global_paths=self._discover_global(home),
             local_paths=self._discover_local(resolved_cwd),
         )
-
-    def _resolve_home(self, justx_home: Path | None) -> Path:
-        if justx_home is not None:
-            return justx_home
-        return get_justx_home()
 
     def _discover_global(self, home: Path) -> list[Path]:
         paths: list[Path] = []
@@ -61,43 +51,11 @@ class JustxDiscovery:
         return None
 
     def _discover_local(self, cwd: Path) -> list[Path]:
-        paths: list[Path] = []
-        root = cwd / "justfile"
-        if root.exists():
-            paths.append(root)
-        paths.extend(self._scan_just_files(cwd / ".justx"))
-        if self._config.recursive:
-            paths.extend(self._discover_local_recursive(cwd))
-        return paths
-
-    def _discover_local_recursive(self, cwd: Path) -> list[Path]:
-        """Walk subdirectories of cwd up to max_depth, finding justfiles and .justx/ dirs."""
-        paths: list[Path] = []
-        exclude = self._config.effective_exclude
-
-        for current_dir, dirnames, _filenames in os.walk(cwd):
-            current = Path(current_dir)
-            depth = len(current.relative_to(cwd).parts)
-
-            if depth > self._config.max_depth:
-                dirnames.clear()
-                continue
-
-            self._exclude_directories(dirnames, exclude)
-
-            if depth == 0:
-                continue
-
-            justfile = current / "justfile"
-            if justfile.exists():
-                paths.append(justfile)
-            paths.extend(self._scan_just_files(current / ".justx"))
-
-        return sorted(paths)
-
-    def _exclude_directories(self, dirnames: list[str], exclude: set[str]) -> None:
-        """Filter os.walk's dirnames in-place to prevent traversal into excluded directories."""
-        dirnames[:] = [d for d in dirnames if d not in exclude and d != ".justx"]
+        for name in ("justfile", "Justfile"):
+            path = cwd / name
+            if path.exists():
+                return [path]
+        return []
 
     def _scan_just_files(self, directory: Path) -> list[Path]:
         if not directory.is_dir():

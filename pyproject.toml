@@ -23,7 +23,6 @@ dependencies = [
     "questionary>=2.1.1",
     "rich>=14.3.3",
     "textual>=8.1.1",
-    "tomli>=2; python_version < '3.11'",
 ]
 
 [project.scripts]

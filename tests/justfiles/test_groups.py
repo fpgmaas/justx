@@ -37,8 +37,8 @@ def test_parse_recipe_without_group():
     assert recipe.groups == []
 
 
-def test_parse_groups_from_justfile(local_dir: Path):
-    source = JustfileParser().parse(local_dir / ".justx" / "groups.just", Scope.LOCAL)
+def test_parse_groups_from_justfile(project_with_modules: Path):
+    [source] = JustfileParser().parse(project_with_modules / "groups.just", Scope.LOCAL)
     recipes = {r.name: r for r in source.recipes}
 
     assert recipes["build"].groups == ["dev"]
@@ -84,19 +84,3 @@ def test_group_recipes_preserves_order_within_group():
 
 def test_group_recipes_empty_list():
     assert group_recipes([]) == []
-
-
-# ---------------------------------------------------------------------------
-# Integration test (parser + model)
-# ---------------------------------------------------------------------------
-
-
-def test_parsed_source_contains_groups(local_dir: Path):
-    source = JustfileParser().parse(local_dir / ".justx" / "groups.just", Scope.LOCAL)
-    recipes = {r.name: r for r in source.recipes}
-
-    assert set(recipes) == {"build", "watch", "test", "lint"}
-    assert recipes["build"].groups == ["dev"]
-    assert recipes["watch"].groups == ["dev"]
-    assert recipes["test"].groups == ["test"]
-    assert recipes["lint"].groups == []

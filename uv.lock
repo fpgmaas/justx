@@ -265,7 +265,6 @@ dependencies = [
     { name = "questionary" },
     { name = "rich" },
     { name = "textual" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.dev-dependencies]
@@ -287,7 +286,6 @@ requires-dist = [
     { name = "questionary", specifier = ">=2.1.1" },
     { name = "rich", specifier = ">=14.3.3" },
     { name = "textual", specifier = ">=8.1.1" },
-    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2" },
 ]
 
 [package.metadata.requires-dev]

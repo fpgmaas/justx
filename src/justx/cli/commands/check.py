@@ -2,35 +2,32 @@ from __future__ import annotations
 
 import shutil
 import sys
+from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.markup import escape
 
-from justx.config import Settings, find_config_path, load_settings
-from justx.justfiles.discovery import DiscoveredPaths, JustxDiscovery
 from justx.justfiles.loader import JustxLoader
+from justx.justfiles.models import JustxConfig, Source
 
 
 @click.command("check")
-@click.option("-v", "--verbose", is_flag=True, default=False, help="Show detailed discovery, sources, and settings.")
+@click.option("-v", "--verbose", is_flag=True, default=False, help="Show detailed discovery and sources.")
 def check_cmd(verbose: bool) -> None:
     """Verify that just is installed and show discovered justfile locations."""
     console = Console()
     _check_just_binary(console)
 
-    settings = load_settings()
-    paths = JustxDiscovery(config=settings.discovery).discover()
+    config = JustxLoader().load()
 
-    _print_summary(console, paths)
-    _print_config_path(console)
+    _print_summary(console, config)
 
     if not verbose:
         return
 
-    _print_discovered_paths(console, paths)
-    _print_sources_and_recipes(console, settings)
-    _print_verbose_settings(console, settings)
+    _print_discovered_paths(console, config)
+    _print_sources_and_recipes(console, config)
 
 
 def _check_just_binary(console: Console) -> None:
@@ -43,61 +40,45 @@ def _check_just_binary(console: Console) -> None:
     console.print(f"[bold]just:[/bold]      [cyan]{escape(just_bin)}[/cyan] [green]✓[/green]")
 
 
-def _print_summary(console: Console, paths: DiscoveredPaths) -> None:
-    n_global = len(paths.global_paths)
-    n_local = len(paths.local_paths)
+def _unique_paths(sources: list[Source]) -> list[Path]:
+    seen: set[Path] = set()
+    paths: list[Path] = []
+    for source in sources:
+        if source.path not in seen:
+            seen.add(source.path)
+            paths.append(source.path)
+    return paths
+
+
+def _print_summary(console: Console, config: JustxConfig) -> None:
+    n_global = len(_unique_paths(config.global_sources))
+    n_local = len(_unique_paths(config.local_sources))
     console.print(f"[bold]justfiles:[/bold] {n_global} global, {n_local} local")
 
 
-def _print_config_path(console: Console) -> None:
-    config_path = find_config_path()
-    if config_path:
-        console.print(f"[bold]config:[/bold]    [cyan]{escape(str(config_path))}[/cyan]")
-    else:
-        console.print("[bold]config:[/bold]    [dim](not found)[/dim]")
+def _print_discovered_paths(console: Console, config: JustxConfig) -> None:
+    global_paths = _unique_paths(config.global_sources)
+    local_paths = _unique_paths(config.local_sources)
 
-
-def _print_discovered_paths(console: Console, paths: DiscoveredPaths) -> None:
     console.print()
     console.print("[bold]Global justfiles:[/bold]")
-    if paths.global_paths:
-        for path in paths.global_paths:
+    if global_paths:
+        for path in global_paths:
             console.print(f"  [cyan]{escape(str(path))}[/cyan]")
     else:
         console.print("  [dim](none)[/dim]")
 
     console.print("\n[bold]Local justfiles:[/bold]")
-    if paths.local_paths:
-        for path in paths.local_paths:
+    if local_paths:
+        for path in local_paths:
             console.print(f"  [cyan]{escape(str(path))}[/cyan]")
     else:
         console.print("  [dim](none)[/dim]")
 
 
-def _print_sources_and_recipes(console: Console, settings: Settings) -> None:
-    config = JustxLoader(config=settings.discovery).load()
+def _print_sources_and_recipes(console: Console, config: JustxConfig) -> None:
     all_sources = [*config.global_sources, *config.local_sources]
     if all_sources:
         console.print("\n[bold]Sources & recipes:[/bold]")
         for source in all_sources:
             source.pretty_print(console)
-
-
-def _print_verbose_settings(console: Console, settings: Settings) -> None:
-    console.print("[bold]Settings:[/bold]")
-    data = settings.model_dump()
-    _print_settings(console, data)
-
-
-def _print_settings(console: Console, data: dict | list | object, indent: int = 1) -> None:
-    """Print settings with consistent styling (dim keys, cyan values)."""
-    prefix = "  " * indent
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if isinstance(value, dict):
-                console.print(f"{prefix}[dim]{escape(str(key))}:[/dim]")
-                _print_settings(console, value, indent + 1)
-            elif isinstance(value, list):
-                console.print(f"{prefix}[dim]{escape(str(key))}:[/dim] [cyan]{escape(repr(value))}[/cyan]")
-            else:
-                console.print(f"{prefix}[dim]{escape(str(key))}:[/dim] [cyan]{escape(str(value))}[/cyan]")

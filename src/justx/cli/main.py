@@ -5,7 +5,6 @@ from importlib.metadata import version
 import click
 
 from justx.cli.commands import check_cmd, init_cmd, list_cmd, run_cmd
-from justx.config import load_settings
 from justx.justfiles.loader import JustxLoader
 from justx.tui import run_tui
 
@@ -30,8 +29,7 @@ def display_version(ctx: click.Context, _param: click.Parameter, value: bool) ->
 def main(ctx: click.Context) -> None:
     """justx — a TUI launcher for just recipes."""
     if ctx.invoked_subcommand is None:
-        settings = load_settings()
-        config = JustxLoader(config=settings.discovery).load()
+        config = JustxLoader().load()
         run_tui(config)
 
 
