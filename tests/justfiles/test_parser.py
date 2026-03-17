@@ -34,6 +34,44 @@ def test_parse_justfile(example_justfile):
     assert args.default is None
 
 
+def test_parse_recipe_quiet():
+    raw = {
+        "name": "silent",
+        "doc": None,
+        "parameters": [],
+        "dependencies": [],
+        "attributes": [],
+        "quiet": True,
+    }
+    recipe = JustfileParser()._parse_recipe(raw)
+    assert recipe.quiet is True
+
+
+def test_parse_recipe_quiet_defaults_to_false():
+    raw = {
+        "name": "loud",
+        "doc": None,
+        "parameters": [],
+        "dependencies": [],
+        "attributes": [],
+    }
+    recipe = JustfileParser()._parse_recipe(raw)
+    assert recipe.quiet is False
+
+
+def test_parse_recipe_attributes():
+    raw = {
+        "name": "deploy",
+        "doc": None,
+        "parameters": [],
+        "dependencies": [],
+        "attributes": ["no-cd", "no-exit-message", {"group": "ops"}],
+    }
+    recipe = JustfileParser()._parse_recipe(raw)
+    assert recipe.attributes == ["no-cd", "no-exit-message"]
+    assert recipe.groups == ["ops"]
+
+
 def test_parse_justfile_not_found():
     with pytest.raises(FileNotFoundError):
         JustfileParser().parse(Path("nonexistent/justfile"), Scope.LOCAL)

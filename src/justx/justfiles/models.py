@@ -57,6 +57,10 @@ class Recipe(BaseModel):
         doc: Doc comment from the justfile, or None.
         parameters: Ordered list of parameters.
         dependencies: Names of recipes this recipe depends on.
+        groups: Group assignments for organizing in UI.
+        body: Lines of the recipe body (commands to execute).
+        quiet: Whether the recipe suppresses just's own output.
+        attributes: Non-group attributes (e.g. "no-cd").
     """
 
     name: str
@@ -64,6 +68,8 @@ class Recipe(BaseModel):
     parameters: list[Parameter]
     dependencies: list[str]
     groups: list[str] = []
+    quiet: bool = False
+    attributes: list[str] = []
 
     @property
     def private(self) -> bool:
