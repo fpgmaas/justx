@@ -1,4 +1,5 @@
 mod docs
+mod kitchen "kitchen-sink-example.just"
 
 # List commands
 default:
