@@ -35,9 +35,17 @@
 ## Installation
 
 ```shell
-uv tool install justx   # recommended
+uv tool install justx
 # or
 pip install justx
+# or
+pipx install justx
+```
+
+Or on Arch Linux:
+
+```sh
+yay -S python-justx
 ```
 
 > **Prerequisite:** the [`just`](https://github.com/casey/just#installation) binary must be available on `$PATH`.
