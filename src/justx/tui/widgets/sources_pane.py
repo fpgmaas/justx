@@ -34,6 +34,8 @@ class SourcesPane(ListView):
 
     BINDINGS: ClassVar = [
         Binding("enter", "activate", "Select", show=False, priority=True),
+        Binding("j", "cursor_down", show=False),
+        Binding("k", "cursor_up", show=False),
     ]
 
     class SourceSelected(Message):
