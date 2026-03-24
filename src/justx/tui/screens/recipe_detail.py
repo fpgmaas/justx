@@ -4,10 +4,11 @@ from typing import ClassVar
 
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
+from textual.containers import Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Footer, Label
+from textual.widgets import Footer, Label, Static
 
+from justx.justfiles.body_reader import JustfileBodyReader
 from justx.justfiles.models import ParameterKind, Recipe, Source
 
 
@@ -18,32 +19,47 @@ class RecipeDetailScreen(Screen[None]):
     }
     #dialog {
         width: 80;
-        height: auto;
+        max-height: 80%;
         border: solid dodgerblue;
         border-title-color: dodgerblue;
-        padding: 1 2;
         background: $surface;
+    }
+    #dialog-scroll {
+        padding: 1 2;
     }
     #name {
         text-style: bold;
         color: $success;
-        margin-bottom: 1;
+    }
+    #description {
+        color: $text-muted;
+    }
+    .tag-row {
+        height: auto;
+    }
+    .detail-label {
+        color: $accent;
+        text-style: bold;
+    }
+    .detail-row {
+        height: auto;
+        margin-top: 1;
     }
     .section-header {
         text-style: bold;
         color: $accent;
         margin-top: 1;
     }
-    .detail-value {
-        color: $text;
-        padding-left: 2;
-    }
-    .detail-muted {
-        color: $text-muted;
-        padding-left: 2;
-    }
-.param-row {
+    .param-row {
         height: auto;
+        padding-left: 2;
+    }
+    .body-separator {
+        color: $accent;
+        margin-top: 1;
+    }
+    #body-code {
+        color: $text;
         padding-left: 2;
     }
     """
@@ -60,29 +76,66 @@ class RecipeDetailScreen(Screen[None]):
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog") as dialog:
             dialog.border_title = "Recipe Details"
-            yield Label(self._recipe.name, id="name")
-
-            if self._recipe.doc:
-                yield Label("Description", classes="section-header")
-                yield Label(self._recipe.doc, classes="detail-value")
-
-            if self._source is not None:
-                yield Label("Justfile", classes="section-header")
-                yield Label(str(self._source.path), classes="detail-muted")
-
-            if self._recipe.dependencies:
-                yield Label("Dependencies", classes="section-header")
-                yield Label(", ".join(self._recipe.dependencies), classes="detail-value")
-
-            if self._recipe.parameters:
-                yield Label("Parameters", classes="section-header")
-                for param in self._recipe.parameters:
-                    yield self._build_param_label(param)
-            else:
-                yield Label("Parameters", classes="section-header")
-                yield Label("none", classes="detail-muted")
-
+            with VerticalScroll(id="dialog-scroll"):
+                yield Label(self._display_name(), id="name")
+                yield from self._compose_description()
+                yield from self._compose_tags()
+                yield from self._compose_metadata()
+                yield from self._compose_parameters()
+                yield from self._compose_body()
         yield Footer()
+
+    def _display_name(self) -> str:
+        if self._source and self._source.module_path:
+            return f"{self._source.module_path}::{self._recipe.name}"
+        return self._recipe.name
+
+    def _compose_description(self) -> ComposeResult:
+        if self._recipe.doc:
+            yield Label(self._recipe.doc, id="description")
+
+    def _compose_tags(self) -> ComposeResult:
+        tags = self._build_tags()
+        if tags:
+            yield Static(" ".join(tags), classes="tag-row")
+
+    def _compose_metadata(self) -> ComposeResult:
+        if self._source is not None:
+            yield Static(
+                f"[bold $accent]Justfile[/]  {self._source.path}",
+                classes="detail-row",
+                markup=True,
+            )
+        if self._recipe.dependencies:
+            dependencies = ", ".join(self._recipe.dependencies)
+            yield Static(
+                f"[bold $accent]Depends[/]   {dependencies}",
+                classes="detail-row",
+                markup=True,
+            )
+
+    def _compose_parameters(self) -> ComposeResult:
+        if not self._recipe.parameters:
+            return
+        yield Label("Parameters", classes="section-header")
+        for param in self._recipe.parameters:
+            yield self._build_param_label(param)
+
+    def _compose_body(self) -> ComposeResult:
+        if self._source is None:
+            return
+        body = JustfileBodyReader().read(self._source.path, self._recipe.name)
+        if body:
+            yield Static("── Body ──", classes="body-separator")
+            yield Static("\n".join(body), id="body-code")
+
+    def _build_tags(self) -> list[str]:
+        tags = []
+        if self._recipe.quiet:
+            tags.append("[dim]quiet[/]")
+        for attribute in self._recipe.attributes:
+            tags.append(f"[dim]{attribute}[/]")
+        return tags
 
     def _build_param_label(self, param) -> Label:
         kind_map = {
