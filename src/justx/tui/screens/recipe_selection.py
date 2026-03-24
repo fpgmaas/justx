@@ -77,7 +77,9 @@ class RecipeSelectionScreen(Screen[Selection | None]):
 
     BINDINGS: ClassVar = [
         Binding("left", "focus_sources", "Sources"),
+        Binding("h", "focus_sources", show=False),
         Binding("right", "focus_recipes", "Recipes"),
+        Binding("l", "focus_recipes", show=False),
         Binding("s", "focus_search", "Search", show=True),
     ]
 
