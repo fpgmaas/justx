@@ -61,7 +61,11 @@ class RecipeScreen(Screen[list[str] | None]):
         Binding("up", "focus_prev_field", "↑ Prev", show=True, priority=True),
         Binding("down", "focus_next_field", "↓ Next", show=True, priority=True),
         Binding("left", "focus_button_left", show=False, priority=True),
+        Binding("h", "focus_button_left", show=False),
         Binding("right", "focus_button_right", show=False, priority=True),
+        Binding("l", "focus_button_right", show=False),
+        Binding("j", "focus_next_field", show=False),
+        Binding("k", "focus_prev_field", show=False),
     ]
 
     def __init__(self, recipe: Recipe, source: Source | None = None) -> None:
@@ -190,6 +194,8 @@ class RecipeScreen(Screen[list[str] | None]):
     def action_focus_next_field(self) -> None:
         if isinstance(self.focused, Input):
             self._advance_focus(self.focused)
+        elif isinstance(self.focused, Button) and self.focused.id == "cancel":
+            self.query_one("#run", Button).focus()
 
     def action_focus_button_left(self) -> None:
         if isinstance(self.focused, Button) and self.focused.id == "run":
@@ -202,7 +208,7 @@ class RecipeScreen(Screen[list[str] | None]):
     def action_focus_prev_field(self) -> None:
         if isinstance(self.focused, Input):
             self._retreat_focus(self.focused)
-        elif isinstance(self.focused, Button) and self.focused.id == "run":
+        elif isinstance(self.focused, Button):
             inputs = self._inputs()
             if inputs:
                 inputs[-1].focus()

@@ -56,6 +56,8 @@ class RecipesPane(ListView):
     BINDINGS: ClassVar = [
         Binding("enter", "run", "Run", show=True, priority=True),
         Binding("d", "details", "Details"),
+        Binding("j", "cursor_down", show=False),
+        Binding("k", "cursor_up", show=False),
     ]
 
     class RecipeRun(Message):
