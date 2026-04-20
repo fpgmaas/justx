@@ -27,7 +27,7 @@ dev:
 
 ## Organising with modules
 
-As your justfile grows, you can split recipes into separate files using `just`'s native [module system](https://just.systems/man/en/modules1190.html). Declare a module in your root justfile with `mod`, and `just` looks for the source file in this order:
+As your justfile grows, you can split recipes into separate files using `just`'s native [module system](https://just.systems/man/en/modules.html). Declare a module in your root justfile with `mod`, and `just` looks for the source file in this order:
 
 - `<name>.just`
 - `<name>/mod.just`

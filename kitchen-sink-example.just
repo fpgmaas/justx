@@ -197,7 +197,7 @@ justwords:
     > /tmp/justwords
 
 # Subsequent dependencies
-# https://just.systems/man/en/chapter_37.html
+# https://just.systems/man/en/dependencies.html#running-recipes-at-the-end-of-a-recipe
 # To test, run `$ just -f test-suite.just b`
 a:
   echo 'A!'
